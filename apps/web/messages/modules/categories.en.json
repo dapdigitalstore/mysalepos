@@ -1,0 +1,13 @@
+{
+  "title": "Categories",
+  "subtitle": "Organise products into categories and sub-categories.",
+  "add": "Add category",
+  "edit": "Edit category",
+  "searchPlaceholder": "Search categories...",
+  "name": "Category name",
+  "shortCode": "Category code",
+  "description": "Description",
+  "parent": "Parent category",
+  "noParent": "None (main category)",
+  "parentHint": "Choose a parent to make this a sub-category."
+}

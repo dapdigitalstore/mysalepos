@@ -1,0 +1,21 @@
+{
+  "title": "Variations",
+  "subtitle": "Reusable variation sets such as Size or Colour. Pick one when you add a variable product.",
+  "add": "Add variation",
+  "edit": "Edit variation",
+  "searchPlaceholder": "Search variations...",
+  "name": "Variation name",
+  "values": "Values",
+  "valuesLabel": "Variation values",
+  "valuePlaceholder": "Value, for example Small",
+  "valueAria": "Value {number}",
+  "addValue": "Add value",
+  "removeValue": "Remove value {number}",
+  "valuesHint": "Existing values keep their link to products when you rename them. A value used by a product cannot be removed.",
+  "atLeastOne": "Add at least one value",
+  "usage": "Used by products",
+  "usedBy": "{count, plural, one {# product} other {# products}}",
+  "unused": "Not used",
+  "deleteBody": "This variation and its values will be deleted. This cannot be undone.",
+  "noValues": "No values"
+}

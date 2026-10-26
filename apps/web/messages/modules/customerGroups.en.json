@@ -1,0 +1,21 @@
+{
+  "title": "Customer groups",
+  "subtitle": "Group customers to give them a standard discount or a special price list.",
+  "add": "Add customer group",
+  "edit": "Edit customer group",
+  "searchPlaceholder": "Search customer groups...",
+  "name": "Group name",
+  "pricing": "Pricing",
+  "pricingGroup": "Price list: {name}",
+  "pricingPercent": "{amount}% on the selling price",
+  "customers": "Customers",
+  "confirmDeleteUsed": "{count, plural, one {1 customer belongs} other {# customers belong}} to this group. They will be left without a group. Delete it?",
+  "calculationType": "Calculation type",
+  "typePercentage": "Percentage",
+  "typePriceGroup": "Selling price group",
+  "percentage": "Percentage",
+  "percentageHint": "Use a negative number for a discount, for example -5 for 5% off.",
+  "priceGroup": "Selling price group",
+  "choosePriceGroup": "Choose a selling price group",
+  "amountRange": "Enter a number between -100 and 100"
+}

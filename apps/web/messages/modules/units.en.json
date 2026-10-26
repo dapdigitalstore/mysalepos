@@ -1,0 +1,17 @@
+{
+  "title": "Units",
+  "subtitle": "Units of measure used for products, such as Piece, Kg or Litre.",
+  "add": "Add unit",
+  "edit": "Edit unit",
+  "searchPlaceholder": "Search units...",
+  "name": "Name",
+  "shortName": "Short name",
+  "allowDecimal": "Allow decimal quantity",
+  "baseUnit": "Base unit",
+  "multiplier": "Multiplier",
+  "defineBase": "Define this as a multiple of another unit",
+  "definition": "1 {unit} = {multiplier} {base}",
+  "noBase": "Base unit",
+  "multiplierHint": "For example 12 when a Dozen is 12 Pieces.",
+  "chooseBase": "Choose a base unit"
+}

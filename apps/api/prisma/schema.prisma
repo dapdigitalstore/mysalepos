@@ -1,0 +1,2866 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model account_transactions {
+  id                      Int                            @id @default(autoincrement()) @db.UnsignedInt
+  account_id              Int
+  type                    account_transactions_type
+  sub_type                account_transactions_sub_type?
+  amount                  Decimal                        @db.Decimal(22, 4)
+  reff_no                 String?
+  operation_date          DateTime                       @db.DateTime(0)
+  created_by              Int
+  transaction_id          Int?
+  transaction_payment_id  Int?
+  transfer_transaction_id Int?
+  note                    String?                        @db.Text
+  deleted_at              DateTime?                      @db.Timestamp(0)
+  created_at              DateTime?                      @db.Timestamp(0)
+  updated_at              DateTime?                      @db.Timestamp(0)
+
+  @@index([account_id], map: "account_transactions_account_id_index")
+  @@index([created_by], map: "account_transactions_created_by_index")
+  @@index([operation_date], map: "account_transactions_operation_date_index")
+  @@index([sub_type], map: "account_transactions_sub_type_index")
+  @@index([transaction_id], map: "account_transactions_transaction_id_index")
+  @@index([transaction_payment_id], map: "account_transactions_transaction_payment_id_index")
+  @@index([transfer_transaction_id], map: "account_transactions_transfer_transaction_id_index")
+  @@index([type], map: "account_transactions_type_index")
+}
+
+model account_types {
+  id                     Int       @id @default(autoincrement()) @db.UnsignedInt
+  name                   String
+  parent_account_type_id Int?
+  business_id            Int
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "account_types_business_id_index")
+  @@index([parent_account_type_id], map: "account_types_parent_account_type_id_index")
+}
+
+model accounts {
+  id              Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id     Int
+  name            String
+  account_number  String
+  account_details String?   @db.Text
+  account_type_id Int?
+  note            String?   @db.Text
+  created_by      Int
+  is_closed       Boolean   @default(false)
+  deleted_at      DateTime? @db.Timestamp(0)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+
+  @@index([account_type_id], map: "accounts_account_type_id_index")
+  @@index([business_id], map: "accounts_business_id_index")
+  @@index([created_by], map: "accounts_created_by_index")
+}
+
+model activity_log {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  log_name     String?
+  description  String    @db.Text
+  subject_id   Int?
+  subject_type String?
+  event        String?
+  business_id  Int?
+  causer_id    Int?
+  causer_type  String?
+  properties   String?   @db.Text
+  batch_uuid   String?   @db.Char(36)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+
+  @@index([log_name], map: "activity_log_log_name_index")
+}
+
+model barcodes {
+  id                    Int       @id @default(autoincrement()) @db.UnsignedInt
+  name                  String
+  description           String?   @db.Text
+  width                 Float?
+  height                Float?
+  paper_width           Float?
+  paper_height          Float?
+  top_margin            Float?
+  left_margin           Float?
+  row_distance          Float?
+  col_distance          Float?
+  stickers_in_one_row   Int?
+  is_default            Boolean   @default(false)
+  is_continuous         Boolean   @default(false)
+  stickers_in_one_sheet Int?
+  business_id           Int?      @db.UnsignedInt
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+  business              business? @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "barcodes_business_id_foreign")
+
+  @@index([business_id], map: "barcodes_business_id_foreign")
+}
+
+model bookings {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  contact_id       Int       @db.UnsignedInt
+  waiter_id        Int?      @db.UnsignedInt
+  table_id         Int?      @db.UnsignedInt
+  correspondent_id Int?
+  business_id      Int       @db.UnsignedInt
+  location_id      Int       @db.UnsignedInt
+  booking_start    DateTime  @db.DateTime(0)
+  booking_end      DateTime  @db.DateTime(0)
+  created_by       Int       @db.UnsignedInt
+  booking_status   String
+  booking_note     String?   @db.Text
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  business         business  @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "bookings_business_id_foreign")
+  contacts         contacts  @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "bookings_contact_id_foreign")
+  users            users     @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "bookings_created_by_foreign")
+
+  @@index([booking_status], map: "bookings_booking_status_index")
+  @@index([business_id], map: "bookings_business_id_foreign")
+  @@index([contact_id], map: "bookings_contact_id_foreign")
+  @@index([correspondent_id], map: "bookings_correspondent_id_index")
+  @@index([created_by], map: "bookings_created_by_foreign")
+  @@index([location_id], map: "bookings_location_id_index")
+  @@index([table_id], map: "bookings_table_id_index")
+  @@index([waiter_id], map: "bookings_waiter_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model brands {
+  id                   Int                    @id @default(autoincrement()) @db.UnsignedInt
+  business_id          Int                    @db.UnsignedInt
+  name                 String
+  description          String?                @db.Text
+  created_by           Int                    @db.UnsignedInt
+  use_for_repair       Boolean                @default(true)
+  deleted_at           DateTime?              @db.Timestamp(0)
+  created_at           DateTime?              @db.Timestamp(0)
+  updated_at           DateTime?              @db.Timestamp(0)
+  business             business               @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "brands_business_id_foreign")
+  users                users                  @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "brands_created_by_foreign")
+  products             products[]
+  repair_device_models repair_device_models[]
+  repair_job_sheets    repair_job_sheets[]
+
+  @@index([business_id], map: "brands_business_id_foreign")
+  @@index([created_by], map: "brands_created_by_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model business {
+  id                                              Int                                @id @default(autoincrement()) @db.UnsignedInt
+  name                                            String
+  currency_id                                     Int                                @db.UnsignedInt
+  start_date                                      DateTime?                          @db.Date
+  tax_number_1                                    String?                            @db.VarChar(100)
+  tax_label_1                                     String?                            @db.VarChar(10)
+  tax_number_2                                    String?                            @db.VarChar(100)
+  tax_label_2                                     String?                            @db.VarChar(10)
+  code_label_1                                    String?
+  code_1                                          String?
+  code_label_2                                    String?
+  code_2                                          String?
+  default_sales_tax                               Int?                               @db.UnsignedInt
+  default_profit_percent                          Float                              @default(0.00)
+  owner_id                                        Int                                @db.UnsignedInt
+  time_zone                                       String                             @default("Asia/Kolkata")
+  fy_start_month                                  Int                                @default(1) @db.TinyInt
+  accounting_method                               business_accounting_method         @default(fifo)
+  default_sales_discount                          Decimal?                           @db.Decimal(5, 2)
+  sell_price_tax                                  business_sell_price_tax            @default(includes)
+  logo                                            String?
+  sku_prefix                                      String?
+  enable_product_expiry                           Boolean                            @default(false)
+  expiry_type                                     business_expiry_type               @default(add_expiry)
+  on_product_expiry                               business_on_product_expiry         @default(keep_selling)
+  stop_selling_before                             Int
+  enable_tooltip                                  Boolean                            @default(true)
+  purchase_in_diff_currency                       Boolean                            @default(false)
+  purchase_currency_id                            Int?                               @db.UnsignedInt
+  p_exchange_rate                                 Decimal                            @default(1.000) @db.Decimal(20, 3)
+  transaction_edit_days                           Int                                @default(30) @db.UnsignedInt
+  stock_expiry_alert_days                         Int                                @default(30) @db.UnsignedInt
+  keyboard_shortcuts                              String?                            @db.Text
+  pos_settings                                    String?                            @db.Text
+  essentials_settings                             String?                            @db.LongText
+  woocommerce_api_settings                        String?                            @db.Text
+  woocommerce_skipped_orders                      String?                            @db.Text
+  woocommerce_wh_oc_secret                        String?
+  woocommerce_wh_ou_secret                        String?
+  woocommerce_wh_od_secret                        String?
+  woocommerce_wh_or_secret                        String?
+  weighing_scale_setting                          String                             @db.Text
+  enable_brand                                    Boolean                            @default(true)
+  enable_category                                 Boolean                            @default(true)
+  enable_sub_category                             Boolean                            @default(true)
+  enable_price_tax                                Boolean                            @default(true)
+  enable_purchase_status                          Boolean?                           @default(true)
+  enable_lot_number                               Boolean                            @default(false)
+  default_unit                                    Int?
+  enable_sub_units                                Boolean                            @default(false)
+  enable_racks                                    Boolean                            @default(false)
+  enable_row                                      Boolean                            @default(false)
+  enable_position                                 Boolean                            @default(false)
+  enable_editing_product_from_purchase            Boolean                            @default(true)
+  sales_cmsn_agnt                                 business_sales_cmsn_agnt?
+  item_addition_method                            Boolean                            @default(true)
+  enable_inline_tax                               Boolean                            @default(true)
+  currency_symbol_placement                       business_currency_symbol_placement @default(before)
+  enabled_modules                                 String?                            @db.Text
+  date_format                                     String                             @default("m/d/Y")
+  time_format                                     String               @default(dbgenerated("24"))
+  currency_precision                              Int                                @default(2) @db.TinyInt
+  quantity_precision                              Int                                @default(2) @db.TinyInt
+  ref_no_prefixes                                 String?                            @db.Text
+  theme_color                                     String?                            @db.Char(20)
+  created_by                                      Int?
+  repair_settings                                 String?                            @db.Text
+  repair_jobsheet_settings                        String?                            @db.Text
+  crm_settings                                    String?                            @db.Text
+  hms_settings                                    String?                            @db.LongText
+  gym_settings                                    String?                            @db.LongText
+  enable_rp                                       Boolean                            @default(false)
+  rp_name                                         String?
+  amount_for_unit_rp                              Decimal                            @default(1.0000) @db.Decimal(22, 4)
+  min_order_total_for_rp                          Decimal                            @default(1.0000) @db.Decimal(22, 4)
+  max_rp_per_order                                Int?
+  redeem_amount_per_unit_rp                       Decimal                            @default(1.0000) @db.Decimal(22, 4)
+  min_order_total_for_redeem                      Decimal                            @default(1.0000) @db.Decimal(22, 4)
+  min_redeem_point                                Int?
+  max_redeem_point                                Int?
+  rp_expiry_period                                Int?
+  rp_expiry_type                                  business_rp_expiry_type            @default(year)
+  email_settings                                  String?                            @db.Text
+  sms_settings                                    String?                            @db.Text
+  custom_labels                                   String?                            @db.Text
+  common_settings                                 String?                            @db.Text
+  is_active                                       Boolean                            @default(true)
+  created_at                                      DateTime?                          @db.Timestamp(0)
+  updated_at                                      DateTime?                          @db.Timestamp(0)
+  barcodes                                        barcodes[]
+  bookings                                        bookings[]
+  brands                                          brands[]
+  currencies                                      currencies                         @relation(fields: [currency_id], references: [id], onUpdate: Restrict, map: "business_currency_id_foreign")
+  tax_rates_business_default_sales_taxTotax_rates tax_rates?                         @relation("business_default_sales_taxTotax_rates", fields: [default_sales_tax], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "business_default_sales_tax_foreign")
+  users_business_owner_idTousers                  users                              @relation("business_owner_idTousers", fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_owner_id_foreign")
+  business_locations                              business_locations[]
+  cash_registers                                  cash_registers[]
+  categories                                      categories[]
+  contacts                                        contacts[]
+  crm_campaigns                                   crm_campaigns[]
+  crm_proposal_templates                          crm_proposal_templates[]
+  crm_proposals                                   crm_proposals[]
+  crm_schedules                                   crm_schedules[]
+  customer_groups                                 customer_groups[]
+  dashboard_configurations                        dashboard_configurations[]
+  expense_categories                              expense_categories[]
+  invoice_layouts                                 invoice_layouts[]
+  invoice_schemes                                 invoice_schemes[]
+  printers                                        printers[]
+  products                                        products[]
+  repair_device_models                            repair_device_models[]
+  repair_job_sheets                               repair_job_sheets[]
+  res_tables                                      res_tables[]
+  roles                                           roles[]
+  selling_price_groups                            selling_price_groups[]
+  subscriptions                                   subscriptions[]
+  tax_rates_tax_rates_business_idTobusiness       tax_rates[]                        @relation("tax_rates_business_idTobusiness")
+  transactions                                    transactions[]
+  units                                           units[]
+  users_users_business_idTobusiness               users[]                            @relation("users_business_idTobusiness")
+  variation_templates                             variation_templates[]
+
+  @@index([currency_id], map: "business_currency_id_foreign")
+  @@index([default_sales_tax], map: "business_default_sales_tax_foreign")
+  @@index([owner_id], map: "business_owner_id_foreign")
+}
+
+model business_locations {
+  id                         Int                                     @id @default(autoincrement()) @db.UnsignedInt
+  business_id                Int                                     @db.UnsignedInt
+  location_id                String?
+  name                       String                                  @db.VarChar(256)
+  landmark                   String?                                 @db.Text
+  country                    String                                  @db.VarChar(100)
+  state                      String                                  @db.VarChar(100)
+  city                       String                                  @db.VarChar(100)
+  zip_code                   String                                  @db.Char(7)
+  invoice_scheme_id          Int                                     @db.UnsignedInt
+  sale_invoice_scheme_id     Int?
+  invoice_layout_id          Int                                     @db.UnsignedInt
+  sale_invoice_layout_id     Int?
+  selling_price_group_id     Int?
+  print_receipt_on_invoice   Boolean?                                @default(true)
+  receipt_printer_type       business_locations_receipt_printer_type @default(browser)
+  printer_id                 Int?
+  mobile                     String?
+  alternate_number           String?
+  email                      String?
+  website                    String?
+  featured_products          String?                                 @db.Text
+  is_active                  Boolean                                 @default(true)
+  default_payment_accounts   String?                                 @db.Text
+  custom_field1              String?
+  custom_field2              String?
+  custom_field3              String?
+  custom_field4              String?
+  deleted_at                 DateTime?                               @db.Timestamp(0)
+  created_at                 DateTime?                               @db.Timestamp(0)
+  updated_at                 DateTime?                               @db.Timestamp(0)
+  business                   business                                @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_locations_business_id_foreign")
+  invoice_layouts            invoice_layouts                         @relation(fields: [invoice_layout_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_locations_invoice_layout_id_foreign")
+  invoice_schemes            invoice_schemes                         @relation(fields: [invoice_scheme_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_locations_invoice_scheme_id_foreign")
+  transactions               transactions[]
+  variation_location_details variation_location_details[]
+
+  @@index([business_id], map: "business_locations_business_id_index")
+  @@index([invoice_layout_id], map: "business_locations_invoice_layout_id_foreign")
+  @@index([invoice_scheme_id], map: "business_locations_invoice_scheme_id_foreign")
+  @@index([printer_id], map: "business_locations_printer_id_index")
+  @@index([receipt_printer_type], map: "business_locations_receipt_printer_type_index")
+  @@index([sale_invoice_layout_id], map: "business_locations_sale_invoice_layout_id_index")
+  @@index([selling_price_group_id], map: "business_locations_selling_price_group_id_index")
+}
+
+model cash_denominations {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id Int
+  amount      Decimal   @db.Decimal(22, 4)
+  total_count Int
+  model_type  String
+  model_id    BigInt    @db.UnsignedBigInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([model_type, model_id], map: "cash_denominations_model_type_model_id_index")
+}
+
+model cash_register_transactions {
+  id               Int                             @id @default(autoincrement()) @db.UnsignedInt
+  cash_register_id Int                             @db.UnsignedInt
+  amount           Decimal                         @default(0.0000) @db.Decimal(22, 4)
+  pay_method       String?
+  type             cash_register_transactions_type
+  transaction_type String?
+  transaction_id   Int?
+  created_at       DateTime?                       @db.Timestamp(0)
+  updated_at       DateTime?                       @db.Timestamp(0)
+  cash_registers   cash_registers                  @relation(fields: [cash_register_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "cash_register_transactions_cash_register_id_foreign")
+
+  @@index([cash_register_id], map: "cash_register_transactions_cash_register_id_foreign")
+  @@index([transaction_id], map: "cash_register_transactions_transaction_id_index")
+  @@index([transaction_type], map: "cash_register_transactions_transaction_type_index")
+  @@index([type], map: "cash_register_transactions_type_index")
+}
+
+model cash_registers {
+  id                         Int                          @id @default(autoincrement()) @db.UnsignedInt
+  business_id                Int                          @db.UnsignedInt
+  location_id                Int?
+  user_id                    Int?                         @db.UnsignedInt
+  status                     cash_registers_status        @default(open)
+  closed_at                  DateTime?                    @db.DateTime(0)
+  closing_amount             Decimal                      @default(0.0000) @db.Decimal(22, 4)
+  total_card_slips           Int                          @default(0)
+  total_cheques              Int                          @default(0)
+  denominations              String?                      @db.Text
+  closing_note               String?                      @db.Text
+  created_at                 DateTime?                    @db.Timestamp(0)
+  updated_at                 DateTime?                    @db.Timestamp(0)
+  cash_register_transactions cash_register_transactions[]
+  business                   business                     @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "cash_registers_business_id_foreign")
+  users                      users?                       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "cash_registers_user_id_foreign")
+
+  @@index([business_id], map: "cash_registers_business_id_foreign")
+  @@index([location_id], map: "cash_registers_location_id_index")
+  @@index([user_id], map: "cash_registers_user_id_foreign")
+}
+
+model categories {
+  id                                            Int                    @id @default(autoincrement()) @db.UnsignedInt
+  name                                          String
+  business_id                                   Int                    @db.UnsignedInt
+  short_code                                    String?
+  parent_id                                     Int
+  created_by                                    Int                    @db.UnsignedInt
+  woocommerce_cat_id                            Int?
+  category_type                                 String?
+  description                                   String?                @db.Text
+  slug                                          String?
+  deleted_at                                    DateTime?              @db.Timestamp(0)
+  created_at                                    DateTime?              @db.Timestamp(0)
+  updated_at                                    DateTime?              @db.Timestamp(0)
+  business                                      business               @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "categories_business_id_foreign")
+  users                                         users                  @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "categories_created_by_foreign")
+  products_products_category_idTocategories     products[]             @relation("products_category_idTocategories")
+  products_products_sub_category_idTocategories products[]             @relation("products_sub_category_idTocategories")
+  repair_device_models                          repair_device_models[]
+  repair_job_sheets                             repair_job_sheets[]
+
+  @@index([business_id], map: "categories_business_id_foreign")
+  @@index([created_by], map: "categories_created_by_foreign")
+  @@index([parent_id], map: "categories_parent_id_index")
+  @@index([woocommerce_cat_id], map: "categories_woocommerce_cat_id_index")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model categorizables {
+  category_id        Int
+  categorizable_type String
+  categorizable_id   BigInt @db.UnsignedBigInt
+
+  @@index([categorizable_type, categorizable_id], map: "categorizables_categorizable_type_categorizable_id_index")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model contacts {
+  id                                   Int                     @id @default(autoincrement()) @db.UnsignedInt
+  business_id                          Int                     @db.UnsignedInt
+  type                                 String
+  contact_type                         String?
+  land_mark                            String?
+  street_name                          String?
+  building_number                      String?
+  additional_number                    String?
+  supplier_business_name               String?
+  name                                 String?
+  prefix                               String?
+  first_name                           String?
+  middle_name                          String?
+  last_name                            String?
+  email                                String?
+  gym_member_profile_photo             String?
+  gym_member_gender                    String?
+  contact_id                           String?
+  contact_status                       String                  @default("active")
+  tax_number                           String?
+  city                                 String?
+  state                                String?
+  country                              String?
+  address_line_1                       String?                 @db.Text
+  address_line_2                       String?                 @db.Text
+  zip_code                             String?
+  dob                                  DateTime?               @db.Date
+  mobile                               String
+  landline                             String?
+  alternate_number                     String?
+  pay_term_number                      Int?
+  pay_term_type                        contacts_pay_term_type?
+  credit_limit                         Decimal?                @db.Decimal(22, 4)
+  created_by                           Int                     @db.UnsignedInt
+  converted_by                         Int?
+  converted_on                         DateTime?               @db.DateTime(0)
+  balance                              Decimal                 @default(0.0000) @db.Decimal(22, 4)
+  total_rp                             Int                     @default(0)
+  total_rp_used                        Int                     @default(0)
+  total_rp_expired                     Int                     @default(0)
+  is_default                           Boolean                 @default(false)
+  shipping_address                     String?                 @db.Text
+  shipping_custom_field_details        String?                 @db.LongText
+  is_export                            Boolean                 @default(false)
+  export_custom_field_1                String?
+  export_custom_field_2                String?
+  export_custom_field_3                String?
+  export_custom_field_4                String?
+  export_custom_field_5                String?
+  export_custom_field_6                String?
+  position                             String?
+  customer_group_id                    Int?
+  crm_source                           String?
+  crm_life_stage                       String?
+  custom_field1                        String?
+  custom_field2                        String?
+  custom_field3                        String?
+  custom_field4                        String?
+  custom_field5                        String?
+  custom_field6                        String?
+  custom_field7                        String?
+  custom_field8                        String?
+  custom_field9                        String?
+  custom_field10                       String?
+  deleted_at                           DateTime?               @db.Timestamp(0)
+  created_at                           DateTime?               @db.Timestamp(0)
+  updated_at                           DateTime?               @db.Timestamp(0)
+  bookings                             bookings[]
+  business                             business                @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "contacts_business_id_foreign")
+  users_contacts_created_byTousers     users                   @relation("contacts_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "contacts_created_by_foreign")
+  crm_lead_users                       crm_lead_users[]
+  crm_proposals                        crm_proposals[]
+  repair_job_sheets                    repair_job_sheets[]
+  transactions                         transactions[]
+  users_users_crm_contact_idTocontacts users[]                 @relation("users_crm_contact_idTocontacts")
+
+  @@index([business_id], map: "contacts_business_id_foreign")
+  @@index([contact_status], map: "contacts_contact_status_index")
+  @@index([converted_by], map: "contacts_converted_by_index")
+  @@index([created_by], map: "contacts_created_by_foreign")
+  @@index([crm_life_stage], map: "contacts_crm_life_stage_index")
+  @@index([crm_source], map: "contacts_crm_source_index")
+  @@index([type], map: "contacts_type_index")
+}
+
+model crm_call_logs {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id   Int
+  user_id       Int?
+  call_type     String?
+  mobile_number String
+  mobile_name   String?
+  contact_id    Int?
+  start_time    DateTime? @db.DateTime(0)
+  end_time      DateTime? @db.DateTime(0)
+  duration      Int?
+  created_by    Int
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "crm_call_logs_business_id_index")
+  @@index([contact_id], map: "crm_call_logs_contact_id_index")
+  @@index([created_by], map: "crm_call_logs_created_by_index")
+  @@index([user_id], map: "crm_call_logs_user_id_index")
+}
+
+model crm_campaigns {
+  id              BigInt                      @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id     Int                         @db.UnsignedInt
+  name            String
+  campaign_type   crm_campaigns_campaign_type @default(email)
+  subject         String?
+  email_body      String?                     @db.Text
+  sms_body        String?                     @db.Text
+  sent_on         DateTime?                   @db.DateTime(0)
+  contact_ids     String                      @db.Text
+  additional_info String?                     @db.Text
+  created_by      Int
+  created_at      DateTime?                   @db.Timestamp(0)
+  updated_at      DateTime?                   @db.Timestamp(0)
+  business        business                    @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_campaigns_business_id_foreign")
+
+  @@index([business_id], map: "crm_campaigns_business_id_foreign")
+  @@index([created_by], map: "crm_campaigns_created_by_index")
+}
+
+model crm_contact_person_commissions {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  contact_person_id Int
+  transaction_id    Int?
+  commission_amount Decimal   @default(0.0000) @db.Decimal(22, 4)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model crm_followup_invoices {
+  follow_up_id   Int
+  transaction_id Int
+
+  @@ignore
+}
+
+model crm_lead_users {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  contact_id Int      @db.UnsignedInt
+  user_id    Int
+  contacts   contacts @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_lead_users_contact_id_foreign")
+
+  @@index([contact_id], map: "crm_lead_users_contact_id_index")
+  @@index([user_id], map: "crm_lead_users_user_id_index")
+}
+
+model crm_marketplaces {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id    Int
+  marketplace    String?
+  site_key       String?
+  site_id        String?
+  assigned_users String?   @db.Text
+  crm_source_id  Int?
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model crm_proposal_templates {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id Int       @db.UnsignedInt
+  subject     String    @db.Text
+  body        String    @db.LongText
+  cc          String?   @db.Text
+  bcc         String?   @db.Text
+  created_by  Int
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  business    business  @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_proposal_templates_business_id_foreign")
+
+  @@index([business_id], map: "crm_proposal_templates_business_id_foreign")
+  @@index([created_by], map: "crm_proposal_templates_created_by_index")
+}
+
+model crm_proposals {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id Int       @db.UnsignedInt
+  contact_id  Int       @db.UnsignedInt
+  subject     String    @db.Text
+  body        String    @db.LongText
+  cc          String?   @db.Text
+  bcc         String?   @db.Text
+  sent_by     Int
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  business    business  @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_proposals_business_id_foreign")
+  contacts    contacts  @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_proposals_contact_id_foreign")
+
+  @@index([business_id], map: "crm_proposals_business_id_foreign")
+  @@index([contact_id], map: "crm_proposals_contact_id_foreign")
+  @@index([sent_by], map: "crm_proposals_sent_by_index")
+}
+
+model crm_schedule_logs {
+  id             BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
+  schedule_id    BigInt                     @db.UnsignedBigInt
+  log_type       crm_schedule_logs_log_type @default(email)
+  start_datetime DateTime                   @db.DateTime(0)
+  end_datetime   DateTime                   @db.DateTime(0)
+  subject        String
+  description    String?                    @db.Text
+  created_by     Int
+  created_at     DateTime?                  @db.Timestamp(0)
+  updated_at     DateTime?                  @db.Timestamp(0)
+  crm_schedules  crm_schedules              @relation(fields: [schedule_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_schedule_logs_schedule_id_foreign")
+
+  @@index([created_by], map: "crm_schedule_logs_created_by_index")
+  @@index([schedule_id], map: "crm_schedule_logs_schedule_id_foreign")
+}
+
+model crm_schedule_users {
+  id            BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  schedule_id   BigInt        @db.UnsignedBigInt
+  user_id       Int
+  created_at    DateTime?     @db.Timestamp(0)
+  updated_at    DateTime?     @db.Timestamp(0)
+  crm_schedules crm_schedules @relation(fields: [schedule_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_schedule_users_schedule_id_foreign")
+
+  @@index([schedule_id], map: "crm_schedule_users_schedule_id_foreign")
+  @@index([user_id], map: "crm_schedule_users_user_id_index")
+}
+
+model crm_schedules {
+  id                       BigInt                      @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id              Int                         @db.UnsignedInt
+  contact_id               Int?
+  title                    String
+  status                   String?
+  start_datetime           DateTime?                   @db.DateTime(0)
+  end_datetime             DateTime?                   @db.DateTime(0)
+  description              String?                     @db.Text
+  schedule_type            crm_schedules_schedule_type @default(email)
+  followup_category_id     Int?
+  allow_notification       Boolean                     @default(true)
+  notify_via               String?                     @db.Text
+  notify_before            Int?
+  notify_type              crm_schedules_notify_type   @default(hour)
+  created_by               Int
+  is_recursive             Boolean                     @default(false)
+  recursion_days           Int?
+  followup_additional_info String?                     @db.Text
+  follow_up_by             String?
+  follow_up_by_value       String?
+  created_at               DateTime?                   @db.Timestamp(0)
+  updated_at               DateTime?                   @db.Timestamp(0)
+  crm_schedule_logs        crm_schedule_logs[]
+  crm_schedule_users       crm_schedule_users[]
+  business                 business                    @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "crm_schedules_business_id_foreign")
+
+  @@index([business_id], map: "crm_schedules_business_id_index")
+  @@index([contact_id], map: "crm_schedules_contact_id_index")
+  @@index([created_by], map: "crm_schedules_created_by_index")
+  @@index([notify_type], map: "crm_schedules_notify_type_index")
+  @@index([schedule_type], map: "crm_schedules_schedule_type_index")
+}
+
+model currencies {
+  id                 Int        @id @default(autoincrement()) @db.UnsignedInt
+  country            String     @db.VarChar(100)
+  currency           String     @db.VarChar(100)
+  code               String     @db.VarChar(25)
+  symbol             String     @db.VarChar(25)
+  thousand_separator String     @db.VarChar(10)
+  decimal_separator  String     @db.VarChar(10)
+  created_at         DateTime?  @db.Timestamp(0)
+  updated_at         DateTime?  @db.Timestamp(0)
+  business           business[]
+}
+
+model customer_groups {
+  id                     Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id            Int       @db.UnsignedInt
+  name                   String
+  amount                 Float
+  price_calculation_type String?   @default("percentage")
+  selling_price_group_id Int?
+  created_by             Int       @db.UnsignedInt
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+  business               business  @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "customer_groups_business_id_foreign")
+
+  @@index([business_id], map: "customer_groups_business_id_foreign")
+  @@index([created_by], map: "customer_groups_created_by_index")
+  @@index([price_calculation_type], map: "customer_groups_price_calculation_type_index")
+  @@index([selling_price_group_id], map: "customer_groups_selling_price_group_id_index")
+}
+
+model dashboard_configurations {
+  id            Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id   Int       @db.UnsignedInt
+  created_by    Int
+  name          String
+  color         String
+  configuration String?   @db.Text
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  business      business  @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "dashboard_configurations_business_id_foreign")
+
+  @@index([business_id], map: "dashboard_configurations_business_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model discount_variations {
+  discount_id  Int
+  variation_id Int
+
+  @@index([discount_id], map: "discount_variations_discount_id_index")
+  @@index([variation_id], map: "discount_variations_variation_id_index")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model discounts {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  name             String
+  business_id      Int
+  brand_id         Int?
+  category_id      Int?
+  location_id      Int?
+  priority         Int?
+  discount_type    String?
+  discount_amount  Decimal   @default(0.0000) @db.Decimal(22, 4)
+  starts_at        DateTime? @db.DateTime(0)
+  ends_at          DateTime? @db.DateTime(0)
+  is_active        Boolean   @default(true)
+  spg              String?   @db.VarChar(100)
+  applicable_in_cg Boolean?  @default(false)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@index([brand_id], map: "discounts_brand_id_index")
+  @@index([business_id], map: "discounts_business_id_index")
+  @@index([category_id], map: "discounts_category_id_index")
+  @@index([location_id], map: "discounts_location_id_index")
+  @@index([priority], map: "discounts_priority_index")
+  @@index([spg], map: "discounts_spg_index")
+}
+
+model document_and_notes {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id  Int
+  notable_id   Int
+  notable_type String
+  heading      String?   @db.Text
+  description  String?   @db.Text
+  is_private   Boolean   @default(false)
+  created_by   Int
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "document_and_notes_business_id_index")
+  @@index([created_by], map: "document_and_notes_created_by_index")
+  @@index([notable_id], map: "document_and_notes_notable_id_index")
+}
+
+model essentials_allowances_and_deductions {
+  id              Int                                              @id @default(autoincrement()) @db.UnsignedInt
+  business_id     Int
+  description     String
+  type            essentials_allowances_and_deductions_type
+  amount          Decimal                                          @db.Decimal(22, 4)
+  amount_type     essentials_allowances_and_deductions_amount_type
+  applicable_date DateTime?                                        @db.Date
+  created_at      DateTime?                                        @db.Timestamp(0)
+  updated_at      DateTime?                                        @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_allowances_and_deductions_business_id_index")
+}
+
+model essentials_attendances {
+  id                  Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id             Int
+  business_id         Int
+  clock_in_time       DateTime? @db.DateTime(0)
+  clock_out_time      DateTime? @db.DateTime(0)
+  essentials_shift_id Int?
+  ip_address          String?
+  clock_in_note       String?   @db.Text
+  clock_out_note      String?   @db.Text
+  clock_in_location   String?   @db.Text
+  clock_out_location  String?   @db.Text
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_attendances_business_id_index")
+  @@index([essentials_shift_id], map: "essentials_attendances_essentials_shift_id_index")
+  @@index([user_id], map: "essentials_attendances_user_id_index")
+}
+
+model essentials_document_shares {
+  id          Int                                   @id @default(autoincrement()) @db.UnsignedInt
+  document_id Int
+  value_type  essentials_document_shares_value_type
+  value       Int
+  created_at  DateTime?                             @db.Timestamp(0)
+  updated_at  DateTime?                             @db.Timestamp(0)
+
+  @@index([document_id], map: "essentials_document_shares_document_id_index")
+  @@index([value_type], map: "essentials_document_shares_value_type_index")
+}
+
+model essentials_documents {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id Int
+  user_id     Int
+  type        String?
+  name        String
+  description String?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model essentials_holidays {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  name        String?
+  start_date  DateTime  @db.Date
+  end_date    DateTime  @db.Date
+  business_id Int
+  location_id Int?
+  note        String?   @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_holidays_business_id_index")
+  @@index([location_id], map: "essentials_holidays_location_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model essentials_kb {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id BigInt    @db.UnsignedBigInt
+  title       String
+  content     String?   @db.LongText
+  status      String
+  kb_type     String
+  parent_id   BigInt?   @db.UnsignedBigInt
+  share_with  String?
+  created_by  BigInt    @db.UnsignedBigInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_kb_business_id_index")
+  @@index([created_by], map: "essentials_kb_created_by_index")
+  @@index([parent_id], map: "essentials_kb_parent_id_index")
+}
+
+model essentials_kb_users {
+  id      BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  kb_id   Int
+  user_id Int
+
+  @@index([kb_id], map: "essentials_kb_users_kb_id_index")
+  @@index([user_id], map: "essentials_kb_users_user_id_index")
+}
+
+model essentials_leave_types {
+  id                   Int                                          @id @default(autoincrement()) @db.UnsignedInt
+  leave_type           String
+  max_leave_count      Int?
+  leave_count_interval essentials_leave_types_leave_count_interval?
+  business_id          Int
+  created_at           DateTime?                                    @db.Timestamp(0)
+  updated_at           DateTime?                                    @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_leave_types_business_id_index")
+}
+
+model essentials_leaves {
+  id                       Int                       @id @default(autoincrement()) @db.UnsignedInt
+  essentials_leave_type_id Int?
+  business_id              Int
+  user_id                  Int
+  start_date               DateTime                  @db.Date
+  end_date                 DateTime                  @db.Date
+  ref_no                   String?
+  status                   essentials_leaves_status?
+  reason                   String?                   @db.Text
+  status_note              String?                   @db.Text
+  is_additional            Boolean                   @default(false)
+  created_at               DateTime?                 @db.Timestamp(0)
+  updated_at               DateTime?                 @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_leaves_business_id_index")
+  @@index([essentials_leave_type_id], map: "essentials_leaves_essentials_leave_type_id_index")
+  @@index([user_id], map: "essentials_leaves_user_id_index")
+}
+
+model essentials_messages {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id Int
+  user_id     Int
+  message     String    @db.Text
+  location_id Int?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_messages_business_id_index")
+  @@index([location_id], map: "essentials_messages_location_id_index")
+  @@index([user_id], map: "essentials_messages_user_id_index")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model essentials_payroll_group_transactions {
+  payroll_group_id BigInt @db.UnsignedBigInt
+  transaction_id   Int
+
+  @@index([payroll_group_id], map: "essentials_payroll_group_transactions_payroll_group_id_foreign")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model essentials_payroll_groups {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id    Int
+  location_id    Int?
+  name           String
+  status         String
+  payment_status String    @default("due")
+  gross_total    Decimal   @default(0.0000) @db.Decimal(22, 4)
+  created_by     Int
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model essentials_reminders {
+  id          Int                         @id @default(autoincrement()) @db.UnsignedInt
+  business_id Int
+  user_id     Int
+  name        String
+  date        DateTime                    @db.Date
+  time        DateTime                    @db.Time(0)
+  end_time    DateTime?                   @db.Time(0)
+  repeat      essentials_reminders_repeat
+  created_at  DateTime?                   @db.Timestamp(0)
+  updated_at  DateTime?                   @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_reminders_business_id_index")
+  @@index([user_id], map: "essentials_reminders_user_id_index")
+}
+
+model essentials_shifts {
+  id                       Int                    @id @default(autoincrement()) @db.UnsignedInt
+  name                     String
+  type                     essentials_shifts_type @default(fixed_shift)
+  business_id              Int
+  start_time               DateTime?              @db.Time(0)
+  end_time                 DateTime?              @db.Time(0)
+  is_allowed_auto_clockout Boolean                @default(false)
+  auto_clockout_time       DateTime?              @db.Time(0)
+  holidays                 String?                @db.Text
+  created_at               DateTime?              @db.Timestamp(0)
+  updated_at               DateTime?              @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_shifts_business_id_index")
+  @@index([type], map: "essentials_shifts_type_index")
+}
+
+model essentials_to_dos {
+  id              Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id     Int
+  task            String    @db.Text
+  date            DateTime? @db.DateTime(0)
+  end_date        DateTime? @db.DateTime(0)
+  task_id         String?
+  description     String?   @db.Text
+  status          String?
+  estimated_hours String?
+  priority        String?
+  created_by      Int?
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "essentials_to_dos_business_id_index")
+  @@index([created_by], map: "essentials_to_dos_created_by_index")
+  @@index([priority], map: "essentials_to_dos_priority_index")
+  @@index([status], map: "essentials_to_dos_status_index")
+  @@index([task_id], map: "essentials_to_dos_task_id_index")
+}
+
+model essentials_todo_comments {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  comment    String    @db.Text
+  task_id    Int
+  comment_by Int
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([comment_by], map: "essentials_todo_comments_comment_by_index")
+  @@index([task_id], map: "essentials_todo_comments_task_id_index")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model essentials_todos_users {
+  todo_id Int
+  user_id Int
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model essentials_user_allowance_and_deductions {
+  user_id                Int
+  allowance_deduction_id Int
+
+  @@index([allowance_deduction_id], map: "allow_deduct_index")
+  @@index([user_id], map: "essentials_user_allowance_and_deductions_user_id_index")
+  @@ignore
+}
+
+model essentials_user_sales_targets {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id            Int
+  target_start       Decimal   @default(0.0000) @db.Decimal(22, 4)
+  target_end         Decimal   @default(0.0000) @db.Decimal(22, 4)
+  commission_percent Decimal   @default(0.0000) @db.Decimal(22, 4)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model essentials_user_shifts {
+  id                  Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id             Int
+  essentials_shift_id Int
+  start_date          DateTime? @db.Date
+  end_date            DateTime? @db.Date
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+
+  @@index([essentials_shift_id], map: "essentials_user_shifts_essentials_shift_id_index")
+  @@index([user_id], map: "essentials_user_shifts_user_id_index")
+}
+
+model expense_categories {
+  id           Int            @id @default(autoincrement()) @db.UnsignedInt
+  name         String
+  business_id  Int            @db.UnsignedInt
+  code         String?
+  parent_id    Int?
+  deleted_at   DateTime?      @db.Timestamp(0)
+  created_at   DateTime?      @db.Timestamp(0)
+  updated_at   DateTime?      @db.Timestamp(0)
+  business     business       @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "expense_categories_business_id_foreign")
+  transactions transactions[]
+
+  @@index([business_id], map: "expense_categories_business_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model group_sub_taxes {
+  group_tax_id                                      Int       @db.UnsignedInt
+  tax_id                                            Int       @db.UnsignedInt
+  tax_rates_group_sub_taxes_group_tax_idTotax_rates tax_rates @relation("group_sub_taxes_group_tax_idTotax_rates", fields: [group_tax_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "group_sub_taxes_group_tax_id_foreign")
+  tax_rates_group_sub_taxes_tax_idTotax_rates       tax_rates @relation("group_sub_taxes_tax_idTotax_rates", fields: [tax_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "group_sub_taxes_tax_id_foreign")
+
+  @@index([group_tax_id], map: "group_sub_taxes_group_tax_id_foreign")
+  @@index([tax_id], map: "group_sub_taxes_tax_id_foreign")
+  @@ignore
+}
+
+model gym_attendances {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  contact_id BigInt    @db.UnsignedBigInt
+  date       DateTime  @db.Date
+  in_time    DateTime? @db.Time(0)
+  out_time   DateTime? @db.Time(0)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model gym_classes {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id Int       @db.UnsignedInt
+  name        String
+  description String?   @db.Text
+  start_time  DateTime? @db.Time(0)
+  end_time    DateTime? @db.Time(0)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "gym_classes_business_id_foreign")
+}
+
+model gym_health_trackings {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  contact_id             BigInt    @db.UnsignedBigInt
+  date                   DateTime  @db.Date
+  neck                   Decimal?  @db.Decimal(5, 2)
+  left_arm               Decimal?  @db.Decimal(5, 2)
+  right_arm              Decimal?  @db.Decimal(5, 2)
+  chest                  Decimal?  @db.Decimal(5, 2)
+  upper_waist            Decimal?  @db.Decimal(5, 2)
+  lower_waist            Decimal?  @db.Decimal(5, 2)
+  hips                   Decimal?  @db.Decimal(5, 2)
+  left_thigh             Decimal?  @db.Decimal(5, 2)
+  right_thigh            Decimal?  @db.Decimal(5, 2)
+  calf                   Decimal?  @db.Decimal(5, 2)
+  weight                 Decimal?  @db.Decimal(5, 2)
+  height                 Decimal?  @db.Decimal(5, 2)
+  shoulders              Decimal?  @db.Decimal(5, 2)
+  body_fat_percentage    Decimal?  @db.Decimal(5, 2)
+  visceral_fat           Decimal?  @db.Decimal(5, 2)
+  subcutaneous_fat       Decimal?  @db.Decimal(5, 2)
+  bmi                    Decimal?  @db.Decimal(5, 2)
+  bmr                    Decimal?  @db.Decimal(5, 2)
+  muscle_mass_percentage Decimal?  @db.Decimal(5, 2)
+  remarks                String?   @db.Text
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+}
+
+model gym_member_diets {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  contact_id     Int       @db.UnsignedInt
+  morning        String?
+  breakfast      String?
+  before_lunch   String?
+  lunch          String?
+  afternoon      String?
+  evening        String?
+  dinner         String?
+  before_sleep   String?
+  before_workout String?
+  after_workout  String?
+  remarks        String?
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([contact_id], map: "gym_member_diets_contact_id_foreign")
+}
+
+model gym_packages {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  business_id Int       @db.UnsignedInt
+  created_by  Int       @db.UnsignedInt
+  name        String
+  duration    String
+  amount      Decimal   @db.Decimal(22, 4)
+  enabled     Boolean   @default(true)
+  notes       String?   @db.Text
+  classes     String?   @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "gym_packages_business_id_foreign")
+  @@index([created_by], map: "gym_packages_created_by_foreign")
+}
+
+model hms_booking_extras {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  transaction_id Int
+  hms_extra_id   Int
+  price          Decimal   @default(0.0000) @db.Decimal(22, 4)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model hms_booking_lines {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  transaction_id   Int
+  hms_room_id      Int
+  hms_room_type_id BigInt    @db.UnsignedBigInt
+  adults           Int
+  childrens        Int
+  price            Decimal   @default(0.0000) @db.Decimal(22, 4)
+  total_price      Decimal   @default(0.0000) @db.Decimal(22, 4)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model hms_coupons {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  hms_room_type_id Int
+  business_id      Int
+  start_date       DateTime  @db.Date
+  end_date         DateTime  @db.Date
+  coupon_code      String
+  discount         Decimal   @db.Decimal(8, 2)
+  discount_type    String
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model hms_extras {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String
+  price       Decimal   @default(0.0000) @db.Decimal(22, 4)
+  price_per   String
+  business_id Int
+  created_by  BigInt    @db.UnsignedBigInt
+  is_active   Boolean   @default(true)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model hms_room_type_pricings {
+  id                      BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  hms_room_type_id        BigInt    @db.UnsignedBigInt
+  season_type             String
+  default_price_per_night Decimal?  @db.Decimal(22, 4)
+  adults                  Decimal?  @db.Decimal(8, 2)
+  childrens               Decimal?  @db.Decimal(8, 2)
+  price_monday            Decimal?  @db.Decimal(22, 4)
+  price_tuesday           Decimal?  @db.Decimal(22, 4)
+  price_wednesday         Decimal?  @db.Decimal(22, 4)
+  price_thursday          Decimal?  @db.Decimal(22, 4)
+  price_friday            Decimal?  @db.Decimal(22, 4)
+  price_saturday          Decimal?  @db.Decimal(22, 4)
+  price_sunday            Decimal?  @db.Decimal(22, 4)
+  created_at              DateTime? @db.Timestamp(0)
+  updated_at              DateTime? @db.Timestamp(0)
+}
+
+model hms_room_types {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  type          String
+  no_of_adult   Int
+  no_of_child   Int
+  max_occupancy Int
+  amenities     String?
+  description   String?   @db.Text
+  business_id   Int
+  created_by    BigInt    @db.UnsignedBigInt
+  deleted_at    DateTime? @db.Timestamp(0)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+model hms_room_unavailables {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  hms_rooms_id     Int
+  date_from        DateTime  @db.Date
+  date_to          DateTime  @db.Date
+  unavailable_type String    @db.Text
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model hms_rooms {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  hms_room_type_id BigInt    @db.UnsignedBigInt
+  room_number      String
+  deleted_at       DateTime? @db.Timestamp(0)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model invoice_layouts {
+  id                       Int                  @id @default(autoincrement()) @db.UnsignedInt
+  name                     String
+  header_text              String?              @db.Text
+  invoice_no_prefix        String?
+  quotation_no_prefix      String?
+  invoice_heading          String?
+  sub_heading_line1        String?
+  sub_heading_line2        String?
+  sub_heading_line3        String?
+  sub_heading_line4        String?
+  sub_heading_line5        String?
+  invoice_heading_not_paid String?
+  invoice_heading_paid     String?
+  quotation_heading        String?
+  sub_total_label          String?
+  discount_label           String?
+  tax_label                String?
+  total_label              String?
+  round_off_label          String?
+  total_due_label          String?
+  paid_label               String?
+  show_client_id           Boolean              @default(false)
+  client_id_label          String?
+  client_tax_label         String?
+  date_label               String?
+  date_time_format         String?
+  show_time                Boolean              @default(true)
+  show_brand               Boolean              @default(false)
+  show_sku                 Boolean              @default(true)
+  show_cat_code            Boolean              @default(true)
+  show_expiry              Boolean              @default(false)
+  show_lot                 Boolean              @default(false)
+  show_image               Boolean              @default(false)
+  show_sale_description    Boolean              @default(false)
+  sales_person_label       String?
+  show_sales_person        Boolean              @default(false)
+  table_product_label      String?
+  table_qty_label          String?
+  table_unit_price_label   String?
+  table_subtotal_label     String?
+  cat_code_label           String?
+  logo                     String?
+  show_logo                Boolean              @default(false)
+  show_business_name       Boolean              @default(false)
+  show_location_name       Boolean              @default(true)
+  show_landmark            Boolean              @default(true)
+  show_city                Boolean              @default(true)
+  show_state               Boolean              @default(true)
+  show_zip_code            Boolean              @default(true)
+  show_country             Boolean              @default(true)
+  show_mobile_number       Boolean              @default(true)
+  show_alternate_number    Boolean              @default(false)
+  show_email               Boolean              @default(false)
+  show_tax_1               Boolean              @default(true)
+  show_tax_2               Boolean              @default(false)
+  show_barcode             Boolean              @default(false)
+  show_payments            Boolean              @default(false)
+  show_customer            Boolean              @default(false)
+  customer_label           String?
+  commission_agent_label   String?
+  show_commission_agent    Boolean              @default(false)
+  show_reward_point        Boolean              @default(false)
+  highlight_color          String?              @db.VarChar(10)
+  footer_text              String?              @db.Text
+  module_info              String?              @db.Text
+  common_settings          String?              @db.Text
+  is_default               Boolean              @default(false)
+  business_id              Int                  @db.UnsignedInt
+  show_letter_head         Boolean              @default(false)
+  letter_head              String?
+  show_qr_code             Boolean              @default(false)
+  qr_code_fields           String?              @db.Text
+  design                   String?              @default("classic") @db.VarChar(190)
+  cn_heading               String?
+  cn_no_label              String?
+  cn_amount_label          String?
+  table_tax_headings       String?              @db.Text
+  show_previous_bal        Boolean              @default(false)
+  prev_bal_label           String?
+  change_return_label      String?
+  product_custom_fields    String?              @db.Text
+  contact_custom_fields    String?              @db.Text
+  location_custom_fields   String?              @db.Text
+  created_at               DateTime?            @db.Timestamp(0)
+  updated_at               DateTime?            @db.Timestamp(0)
+  business_locations       business_locations[]
+  business                 business             @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "invoice_layouts_business_id_foreign")
+
+  @@index([business_id], map: "invoice_layouts_business_id_foreign")
+}
+
+model invoice_schemes {
+  id                 Int                         @id @default(autoincrement()) @db.UnsignedInt
+  business_id        Int                         @db.UnsignedInt
+  name               String
+  scheme_type        invoice_schemes_scheme_type
+  number_type        String                      @default("sequential") @db.VarChar(100)
+  prefix             String?
+  start_number       Int?
+  invoice_count      Int                         @default(0)
+  total_digits       Int?
+  is_default         Boolean                     @default(false)
+  created_at         DateTime?                   @db.Timestamp(0)
+  updated_at         DateTime?                   @db.Timestamp(0)
+  business_locations business_locations[]
+  business           business                    @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "invoice_schemes_business_id_foreign")
+
+  @@index([business_id], map: "invoice_schemes_business_id_foreign")
+  @@index([number_type], map: "invoice_schemes_number_type_index")
+  @@index([scheme_type], map: "invoice_schemes_scheme_type_index")
+}
+
+model media {
+  id                   Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id          Int
+  file_name            String
+  description          String?   @db.Text
+  uploaded_by          Int?
+  model_type           String
+  woocommerce_media_id Int?
+  model_media_type     String?
+  model_id             BigInt    @db.UnsignedBigInt
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "media_business_id_index")
+  @@index([model_type, model_id], map: "media_model_type_model_id_index")
+  @@index([uploaded_by], map: "media_uploaded_by_index")
+  @@index([woocommerce_media_id], map: "media_woocommerce_media_id_index")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String
+  batch     Int
+}
+
+model model_has_permissions {
+  permission_id Int         @db.UnsignedInt
+  model_type    String
+  model_id      BigInt      @db.UnsignedBigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_permissions_permission_id_foreign")
+
+  @@id([permission_id, model_id, model_type])
+  @@index([model_type, model_id], map: "model_has_permissions_model_type_model_id_index")
+}
+
+model model_has_roles {
+  role_id    Int    @db.UnsignedInt
+  model_type String
+  model_id   BigInt @db.UnsignedBigInt
+  roles      roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_roles_role_id_foreign")
+
+  @@id([role_id, model_id, model_type])
+  @@index([model_type, model_id], map: "model_has_roles_model_type_model_id_index")
+}
+
+model notification_templates {
+  id                 Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id        Int
+  template_for       String
+  email_body         String?   @db.Text
+  sms_body           String?   @db.Text
+  whatsapp_text      String?   @db.Text
+  subject            String?
+  cc                 String?
+  bcc                String?
+  auto_send          Boolean   @default(false)
+  auto_send_sms      Boolean   @default(false)
+  auto_send_wa_notif Boolean   @default(false)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model notifications {
+  id              String    @id @db.Char(36)
+  type            String
+  notifiable_type String
+  notifiable_id   BigInt    @db.UnsignedBigInt
+  data            String    @db.Text
+  read_at         DateTime? @db.Timestamp(0)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+
+  @@index([notifiable_type, notifiable_id], map: "notifications_notifiable_type_notifiable_id_index")
+}
+
+model oauth_access_tokens {
+  id         String    @id @db.VarChar(100)
+  user_id    BigInt?
+  client_id  Int       @db.UnsignedInt
+  name       String?
+  scopes     String?   @db.Text
+  revoked    Boolean
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_access_tokens_user_id_index")
+}
+
+model oauth_auth_codes {
+  id         String    @id @db.VarChar(100)
+  user_id    BigInt
+  client_id  Int       @db.UnsignedInt
+  scopes     String?   @db.Text
+  revoked    Boolean
+  expires_at DateTime? @db.DateTime(0)
+}
+
+model oauth_clients {
+  id                     Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id                BigInt?
+  name                   String
+  secret                 String    @db.VarChar(100)
+  provider               String?
+  redirect               String    @db.Text
+  personal_access_client Boolean
+  password_client        Boolean
+  revoked                Boolean
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "oauth_clients_user_id_index")
+}
+
+model oauth_personal_access_clients {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  client_id  Int       @db.UnsignedInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([client_id], map: "oauth_personal_access_clients_client_id_index")
+}
+
+model oauth_refresh_tokens {
+  id              String    @id @db.VarChar(100)
+  access_token_id String    @db.VarChar(100)
+  revoked         Boolean
+  expires_at      DateTime? @db.DateTime(0)
+
+  @@index([access_token_id], map: "oauth_refresh_tokens_access_token_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model packages {
+  id                      Int               @id @default(autoincrement()) @db.UnsignedInt
+  name                    String
+  description             String            @db.Text
+  location_count          Int
+  user_count              Int
+  product_count           Int
+  bookings                Boolean           @default(false)
+  kitchen                 Boolean           @default(false)
+  order_screen            Boolean           @default(false)
+  tables                  Boolean           @default(false)
+  invoice_count           Int
+  interval                packages_interval
+  interval_count          Int
+  trial_days              Int
+  price                   Decimal           @db.Decimal(22, 4)
+  custom_permissions      String            @db.LongText
+  created_by              Int
+  sort_order              Int               @default(0)
+  is_active               Boolean
+  mark_package_as_popular Boolean
+  businesses              String?           @db.LongText
+  is_private              Boolean           @default(false)
+  is_one_time             Boolean           @default(false)
+  enable_custom_link      Boolean           @default(false)
+  custom_link             String?
+  custom_link_text        String?
+  deleted_at              DateTime?         @db.Timestamp(0)
+  created_at              DateTime?         @db.Timestamp(0)
+  updated_at              DateTime?         @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String
+  token      String
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model permissions {
+  id                    Int                     @id @default(autoincrement()) @db.UnsignedInt
+  name                  String
+  guard_name            String
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  model_has_permissions model_has_permissions[]
+  role_has_permissions  role_has_permissions[]
+}
+
+model printers {
+  id                 Int                         @id @default(autoincrement()) @db.UnsignedInt
+  business_id        Int                         @db.UnsignedInt
+  name               String
+  connection_type    printers_connection_type
+  capability_profile printers_capability_profile @default(default)
+  char_per_line      String?
+  ip_address         String?
+  port               String?
+  path               String?
+  created_by         Int                         @db.UnsignedInt
+  created_at         DateTime?                   @db.Timestamp(0)
+  updated_at         DateTime?                   @db.Timestamp(0)
+  business           business                    @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "printers_business_id_foreign")
+
+  @@index([business_id], map: "printers_business_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model product_locations {
+  product_id  Int
+  location_id Int
+
+  @@index([location_id], map: "product_locations_location_id_index")
+  @@index([product_id], map: "product_locations_product_id_index")
+  @@ignore
+}
+
+model product_racks {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id Int       @db.UnsignedInt
+  location_id Int       @db.UnsignedInt
+  product_id  Int       @db.UnsignedInt
+  rack        String?
+  row         String?
+  position    String?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "product_racks_business_id_index")
+  @@index([location_id], map: "product_racks_location_id_index")
+  @@index([product_id], map: "product_racks_product_id_index")
+}
+
+model product_variations {
+  id                    Int          @id @default(autoincrement()) @db.UnsignedInt
+  variation_template_id Int?
+  name                  String
+  product_id            Int          @db.UnsignedInt
+  is_dummy              Boolean      @default(true)
+  created_at            DateTime?    @db.Timestamp(0)
+  updated_at            DateTime?    @db.Timestamp(0)
+  products              products     @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "product_variations_product_id_foreign")
+  variations            variations[]
+
+  @@index([name], map: "product_variations_name_index")
+  @@index([product_id], map: "product_variations_product_id_index")
+}
+
+model products {
+  id                                              Int                          @id @default(autoincrement()) @db.UnsignedInt
+  name                                            String
+  business_id                                     Int                          @db.UnsignedInt
+  type                                            products_type?
+  unit_id                                         Int?                         @db.UnsignedInt
+  secondary_unit_id                               Int?
+  sub_unit_ids                                    String?                      @db.Text
+  brand_id                                        Int?                         @db.UnsignedInt
+  category_id                                     Int?                         @db.UnsignedInt
+  sub_category_id                                 Int?                         @db.UnsignedInt
+  tax                                             Int?                         @db.UnsignedInt
+  tax_type                                        products_tax_type
+  enable_stock                                    Boolean                      @default(false)
+  alert_quantity                                  Decimal?                     @db.Decimal(22, 4)
+  sku                                             String
+  barcode_type                                    products_barcode_type?       @default(C128)
+  expiry_period                                   Decimal?                     @db.Decimal(4, 2)
+  expiry_period_type                              products_expiry_period_type?
+  enable_sr_no                                    Boolean                      @default(false)
+  weight                                          String?
+  product_custom_field1                           String?
+  product_custom_field2                           String?
+  product_custom_field3                           String?
+  product_custom_field4                           String?
+  product_custom_field5                           String?
+  product_custom_field6                           String?
+  product_custom_field7                           String?
+  product_custom_field8                           String?
+  product_custom_field9                           String?
+  product_custom_field10                          String?
+  product_custom_field11                          String?
+  product_custom_field12                          String?
+  product_custom_field13                          String?
+  product_custom_field14                          String?
+  product_custom_field15                          String?
+  product_custom_field16                          String?
+  product_custom_field17                          String?
+  product_custom_field18                          String?
+  product_custom_field19                          String?
+  product_custom_field20                          String?
+  image                                           String?
+  woocommerce_media_id                            Int?
+  product_description                             String?                      @db.Text
+  created_by                                      Int                          @db.UnsignedInt
+  woocommerce_product_id                          Int?
+  woocommerce_disable_sync                        Boolean                      @default(false)
+  preparation_time_in_minutes                     Int?
+  warranty_id                                     Int?
+  is_inactive                                     Boolean                      @default(false)
+  repair_model_id                                 Int?                         @db.UnsignedInt
+  not_for_selling                                 Boolean                      @default(false)
+  created_at                                      DateTime?                    @db.Timestamp(0)
+  updated_at                                      DateTime?                    @db.Timestamp(0)
+  product_variations                              product_variations[]
+  brands                                          brands?                      @relation(fields: [brand_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_brand_id_foreign")
+  business                                        business                     @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_business_id_foreign")
+  categories_products_category_idTocategories     categories?                  @relation("products_category_idTocategories", fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_category_id_foreign")
+  users                                           users                        @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_created_by_foreign")
+  repair_device_models                            repair_device_models?        @relation(fields: [repair_model_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "products_repair_model_id_foreign")
+  categories_products_sub_category_idTocategories categories?                  @relation("products_sub_category_idTocategories", fields: [sub_category_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_sub_category_id_foreign")
+  tax_rates                                       tax_rates?                   @relation(fields: [tax], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "products_tax_foreign")
+  units                                           units?                       @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_unit_id_foreign")
+  purchase_lines                                  purchase_lines[]
+  res_product_modifier_sets                       res_product_modifier_sets[]  @ignore
+  stock_adjustment_lines                          stock_adjustment_lines[]
+  transaction_sell_lines                          transaction_sell_lines[]
+  variations                                      variations[]
+
+  @@index([barcode_type], map: "products_barcode_type_index")
+  @@index([brand_id], map: "products_brand_id_foreign")
+  @@index([business_id], map: "products_business_id_index")
+  @@index([category_id], map: "products_category_id_foreign")
+  @@index([created_by], map: "products_created_by_index")
+  @@index([name], map: "products_name_index")
+  @@index([repair_model_id], map: "products_repair_model_id_index")
+  @@index([secondary_unit_id], map: "products_secondary_unit_id_index")
+  @@index([sub_category_id], map: "products_sub_category_id_foreign")
+  @@index([tax], map: "products_tax_foreign")
+  @@index([tax_type], map: "products_tax_type_index")
+  @@index([type], map: "products_type_index")
+  @@index([unit_id], map: "products_unit_id_index")
+  @@index([warranty_id], map: "products_warranty_id_index")
+  @@index([woocommerce_media_id], map: "products_woocommerce_media_id_index")
+  @@index([woocommerce_product_id], map: "products_woocommerce_product_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model purchase_lines {
+  id                           Int          @id @default(autoincrement()) @db.UnsignedInt
+  transaction_id               Int          @db.UnsignedInt
+  product_id                   Int          @db.UnsignedInt
+  variation_id                 Int          @db.UnsignedInt
+  quantity                     Decimal      @default(0.0000) @db.Decimal(22, 4)
+  secondary_unit_quantity      Decimal      @default(0.0000) @db.Decimal(22, 4)
+  pp_without_discount          Decimal      @default(0.0000) @db.Decimal(22, 4)
+  discount_percent             Decimal      @default(0.00) @db.Decimal(5, 2)
+  purchase_price               Decimal      @db.Decimal(22, 4)
+  purchase_price_inc_tax       Decimal      @default(0.0000) @db.Decimal(22, 4)
+  item_tax                     Decimal      @db.Decimal(22, 4)
+  tax_id                       Int?         @db.UnsignedInt
+  purchase_requisition_line_id Int?
+  purchase_order_line_id       Int?
+  quantity_sold                Decimal      @default(0.0000) @db.Decimal(22, 4)
+  quantity_adjusted            Decimal      @default(0.0000) @db.Decimal(22, 4)
+  quantity_returned            Decimal      @default(0.0000) @db.Decimal(22, 4)
+  po_quantity_purchased        Decimal      @default(0.0000) @db.Decimal(22, 4)
+  mfg_quantity_used            Decimal      @default(0.0000) @db.Decimal(22, 4)
+  mfg_date                     DateTime?    @db.Date
+  exp_date                     DateTime?    @db.Date
+  lot_number                   String?
+  sub_unit_id                  Int?
+  created_at                   DateTime?    @db.Timestamp(0)
+  updated_at                   DateTime?    @db.Timestamp(0)
+  products                     products     @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "purchase_lines_product_id_foreign")
+  tax_rates                    tax_rates?   @relation(fields: [tax_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "purchase_lines_tax_id_foreign")
+  transactions                 transactions @relation(fields: [transaction_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "purchase_lines_transaction_id_foreign")
+  variations                   variations   @relation(fields: [variation_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "purchase_lines_variation_id_foreign")
+
+  @@index([lot_number], map: "purchase_lines_lot_number_index")
+  @@index([product_id], map: "purchase_lines_product_id_foreign")
+  @@index([sub_unit_id], map: "purchase_lines_sub_unit_id_index")
+  @@index([tax_id], map: "purchase_lines_tax_id_foreign")
+  @@index([transaction_id], map: "purchase_lines_transaction_id_foreign")
+  @@index([variation_id], map: "purchase_lines_variation_id_foreign")
+}
+
+model reference_counts {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  ref_type    String
+  ref_count   Int
+  business_id Int
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@index([business_id], map: "reference_counts_business_id_index")
+}
+
+model repair_device_models {
+  id                Int                 @id @default(autoincrement()) @db.UnsignedInt
+  business_id       Int                 @db.UnsignedInt
+  name              String
+  repair_checklist  String?             @db.Text
+  brand_id          Int?                @db.UnsignedInt
+  device_id         Int?                @db.UnsignedInt
+  created_by        Int                 @db.UnsignedInt
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  products          products[]
+  brands            brands?             @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "repair_device_models_brand_id_foreign")
+  business          business            @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "repair_device_models_business_id_foreign")
+  users             users               @relation(fields: [created_by], references: [id], onUpdate: Restrict, map: "repair_device_models_created_by_foreign")
+  categories        categories?         @relation(fields: [device_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "repair_device_models_device_id_foreign")
+  repair_job_sheets repair_job_sheets[]
+
+  @@index([brand_id], map: "repair_device_models_brand_id_index")
+  @@index([business_id], map: "repair_device_models_business_id_index")
+  @@index([created_by], map: "repair_device_models_created_by_index")
+  @@index([device_id], map: "repair_device_models_device_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model repair_job_sheets {
+  id                                           Int                            @id @default(autoincrement()) @db.UnsignedInt
+  business_id                                  Int                            @db.UnsignedInt
+  location_id                                  Int?                           @db.UnsignedInt
+  contact_id                                   Int                            @db.UnsignedInt
+  job_sheet_no                                 String
+  service_type                                 repair_job_sheets_service_type
+  pick_up_on_site_addr                         String?                        @db.Text
+  brand_id                                     Int?                           @db.UnsignedInt
+  device_id                                    Int?                           @db.UnsignedInt
+  device_model_id                              Int?                           @db.UnsignedInt
+  checklist                                    String?                        @db.Text
+  security_pwd                                 String?
+  security_pattern                             String?
+  serial_no                                    String
+  status_id                                    Int
+  delivery_date                                DateTime?                      @db.DateTime(0)
+  product_configuration                        String?                        @db.Text
+  defects                                      String?                        @db.Text
+  product_condition                            String?                        @db.Text
+  service_staff                                Int?                           @db.UnsignedInt
+  comment_by_ss                                String?                        @db.Text
+  estimated_cost                               Decimal?                       @db.Decimal(22, 4)
+  created_by                                   Int                            @db.UnsignedInt
+  parts                                        String?                        @db.Text
+  custom_field_1                               String?
+  custom_field_2                               String?
+  custom_field_3                               String?
+  custom_field_4                               String?
+  custom_field_5                               String?
+  created_at                                   DateTime?                      @db.Timestamp(0)
+  updated_at                                   DateTime?                      @db.Timestamp(0)
+  brands                                       brands?                        @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "repair_job_sheets_brand_id_foreign")
+  business                                     business                       @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "repair_job_sheets_business_id_foreign")
+  contacts                                     contacts                       @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "repair_job_sheets_contact_id_foreign")
+  users_repair_job_sheets_created_byTousers    users                          @relation("repair_job_sheets_created_byTousers", fields: [created_by], references: [id], onUpdate: Restrict, map: "repair_job_sheets_created_by_foreign")
+  categories                                   categories?                    @relation(fields: [device_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "repair_job_sheets_device_id_foreign")
+  repair_device_models                         repair_device_models?          @relation(fields: [device_model_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "repair_job_sheets_device_model_id_foreign")
+  users_repair_job_sheets_service_staffTousers users?                         @relation("repair_job_sheets_service_staffTousers", fields: [service_staff], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "repair_job_sheets_service_staff_foreign")
+  transactions                                 transactions[]
+
+  @@index([brand_id], map: "repair_job_sheets_brand_id_index")
+  @@index([business_id], map: "repair_job_sheets_business_id_index")
+  @@index([contact_id], map: "repair_job_sheets_contact_id_index")
+  @@index([created_by], map: "repair_job_sheets_created_by_index")
+  @@index([device_id], map: "repair_job_sheets_device_id_index")
+  @@index([device_model_id], map: "repair_job_sheets_device_model_id_index")
+  @@index([location_id], map: "repair_job_sheets_location_id_index")
+  @@index([service_staff], map: "repair_job_sheets_service_staff_index")
+  @@index([status_id], map: "repair_job_sheets_status_id_index")
+}
+
+model repair_statuses {
+  id                  Int       @id @default(autoincrement()) @db.UnsignedInt
+  name                String
+  color               String?
+  sort_order          Int?
+  business_id         Int
+  is_completed_status Boolean   @default(false)
+  sms_template        String?   @db.Text
+  email_subject       String?   @db.Text
+  email_body          String?   @db.Text
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model res_product_modifier_sets {
+  modifier_set_id Int      @db.UnsignedInt
+  product_id      Int      @db.UnsignedInt
+  products        products @relation(fields: [modifier_set_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "res_product_modifier_sets_modifier_set_id_foreign")
+
+  @@index([modifier_set_id], map: "res_product_modifier_sets_modifier_set_id_foreign")
+  @@ignore
+}
+
+model res_tables {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id Int       @db.UnsignedInt
+  location_id Int       @db.UnsignedInt
+  name        String
+  description String?   @db.Text
+  created_by  Int       @db.UnsignedInt
+  deleted_at  DateTime? @db.Timestamp(0)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  business    business  @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "res_tables_business_id_foreign")
+
+  @@index([business_id], map: "res_tables_business_id_foreign")
+}
+
+model role_has_permissions {
+  permission_id Int         @db.UnsignedInt
+  role_id       Int         @db.UnsignedInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_has_permissions_permission_id_foreign")
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_has_permissions_role_id_foreign")
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_has_permissions_role_id_foreign")
+}
+
+model roles {
+  id                   Int                    @id @default(autoincrement()) @db.UnsignedInt
+  name                 String
+  guard_name           String
+  business_id          Int                    @db.UnsignedInt
+  is_default           Boolean                @default(false)
+  is_service_staff     Boolean                @default(false)
+  created_at           DateTime?              @db.Timestamp(0)
+  updated_at           DateTime?              @db.Timestamp(0)
+  model_has_roles      model_has_roles[]
+  role_has_permissions role_has_permissions[]
+  business             business               @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "roles_business_id_foreign")
+
+  @@index([business_id], map: "roles_business_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model sell_line_warranties {
+  sell_line_id Int
+  warranty_id  Int
+
+  @@ignore
+}
+
+model selling_price_groups {
+  id                     Int                      @id @default(autoincrement()) @db.UnsignedInt
+  name                   String
+  description            String?                  @db.Text
+  business_id            Int                      @db.UnsignedInt
+  is_active              Boolean                  @default(true)
+  deleted_at             DateTime?                @db.Timestamp(0)
+  created_at             DateTime?                @db.Timestamp(0)
+  updated_at             DateTime?                @db.Timestamp(0)
+  business               business                 @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "selling_price_groups_business_id_foreign")
+  variation_group_prices variation_group_prices[]
+
+  @@index([business_id], map: "selling_price_groups_business_id_foreign")
+}
+
+model sessions {
+  id            String  @unique(map: "sessions_id_unique")
+  user_id       Int?    @db.UnsignedInt
+  ip_address    String? @db.VarChar(45)
+  user_agent    String? @db.Text
+  payload       String  @db.Text
+  last_activity Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model stock_adjustment_lines {
+  id                      Int          @id @default(autoincrement()) @db.UnsignedInt
+  transaction_id          Int          @db.UnsignedInt
+  product_id              Int          @db.UnsignedInt
+  variation_id            Int          @db.UnsignedInt
+  quantity                Decimal      @db.Decimal(22, 4)
+  secondary_unit_quantity Decimal      @default(0.0000) @db.Decimal(22, 4)
+  unit_price              Decimal?     @db.Decimal(22, 4)
+  removed_purchase_line   Int?
+  lot_no_line_id          Int?
+  created_at              DateTime?    @db.Timestamp(0)
+  updated_at              DateTime?    @db.Timestamp(0)
+  products                products     @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "stock_adjustment_lines_product_id_foreign")
+  transactions            transactions @relation(fields: [transaction_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "stock_adjustment_lines_transaction_id_foreign")
+  variations              variations   @relation(fields: [variation_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "stock_adjustment_lines_variation_id_foreign")
+
+  @@index([lot_no_line_id], map: "stock_adjustment_lines_lot_no_line_id_index")
+  @@index([product_id], map: "stock_adjustment_lines_product_id_foreign")
+  @@index([transaction_id], map: "stock_adjustment_lines_transaction_id_index")
+  @@index([variation_id], map: "stock_adjustment_lines_variation_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model stock_adjustments_temp {
+  id Int?
+
+  @@ignore
+}
+
+model subscriptions {
+  id                     Int                  @id @default(autoincrement()) @db.UnsignedInt
+  business_id            Int                  @db.UnsignedInt
+  package_id             Int                  @db.UnsignedInt
+  start_date             DateTime?            @db.Date
+  trial_end_date         DateTime?            @db.Date
+  end_date               DateTime?            @db.Date
+  package_price          Decimal              @db.Decimal(22, 4)
+  original_price         Decimal?             @db.Decimal(22, 4)
+  coupon_code            String?
+  package_details        String               @db.LongText
+  created_id             Int                  @db.UnsignedInt
+  paid_via               String?
+  payment_transaction_id String?
+  status                 subscriptions_status @default(waiting)
+  deleted_at             DateTime?            @db.Timestamp(0)
+  created_at             DateTime?            @db.Timestamp(0)
+  updated_at             DateTime?            @db.Timestamp(0)
+  business               business             @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "subscriptions_business_id_foreign")
+
+  @@index([business_id], map: "subscriptions_business_id_foreign")
+  @@index([created_id], map: "subscriptions_created_id_index")
+  @@index([package_id], map: "subscriptions_package_id_index")
+}
+
+model superadmin_communicator_logs {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_ids String?   @db.Text
+  subject      String?
+  message      String?   @db.Text
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model superadmin_coupons {
+  id                  BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  coupon_code         String
+  discount_type       String
+  discount            Decimal   @db.Decimal(8, 2)
+  expiry_date         DateTime? @db.Date
+  applied_on_packages String?
+  applied_on_business String?
+  is_active           Boolean
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+}
+
+model superadmin_frontend_pages {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  title      String?
+  slug       String
+  content    String    @db.LongText
+  is_shown   Boolean
+  menu_order Int?      @default(0)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model system {
+  id    Int     @id @default(autoincrement()) @db.UnsignedInt
+  key   String
+  value String? @db.Text
+}
+
+model tax_rates {
+  id                                                      Int                      @id @default(autoincrement()) @db.UnsignedInt
+  business_id                                             Int                      @db.UnsignedInt
+  name                                                    String
+  amount                                                  Float
+  is_tax_group                                            Boolean                  @default(false)
+  for_tax_group                                           Boolean                  @default(false)
+  created_by                                              Int                      @db.UnsignedInt
+  woocommerce_tax_rate_id                                 Int?
+  deleted_at                                              DateTime?                @db.Timestamp(0)
+  created_at                                              DateTime?                @db.Timestamp(0)
+  updated_at                                              DateTime?                @db.Timestamp(0)
+  business_business_default_sales_taxTotax_rates          business[]               @relation("business_default_sales_taxTotax_rates")
+  group_sub_taxes_group_sub_taxes_group_tax_idTotax_rates group_sub_taxes[]        @relation("group_sub_taxes_group_tax_idTotax_rates") @ignore
+  group_sub_taxes_group_sub_taxes_tax_idTotax_rates       group_sub_taxes[]        @relation("group_sub_taxes_tax_idTotax_rates") @ignore
+  products                                                products[]
+  purchase_lines                                          purchase_lines[]
+  business_tax_rates_business_idTobusiness                business                 @relation("tax_rates_business_idTobusiness", fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "tax_rates_business_id_foreign")
+  users                                                   users                    @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "tax_rates_created_by_foreign")
+  transaction_sell_lines                                  transaction_sell_lines[]
+  transactions                                            transactions[]
+
+  @@index([business_id], map: "tax_rates_business_id_foreign")
+  @@index([created_by], map: "tax_rates_created_by_foreign")
+  @@index([woocommerce_tax_rate_id], map: "tax_rates_woocommerce_tax_rate_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transaction_payments {
+  id                      Int           @id @default(autoincrement()) @db.UnsignedInt
+  transaction_id          Int?          @db.UnsignedInt
+  business_id             Int?
+  is_return               Boolean       @default(false)
+  amount                  Decimal       @default(0.0000) @db.Decimal(22, 4)
+  method                  String?
+  payment_type            String?
+  transaction_no          String?
+  card_transaction_number String?
+  card_number             String?
+  card_type               String?
+  card_holder_name        String?
+  card_month              String?
+  card_year               String?
+  card_security           String?       @db.VarChar(5)
+  cheque_number           String?
+  bank_account_number     String?
+  paid_on                 DateTime?     @db.DateTime(0)
+  created_by              Int?
+  paid_through_link       Boolean       @default(false)
+  gateway                 String?
+  is_advance              Boolean       @default(false)
+  payment_for             Int?
+  parent_id               Int?
+  note                    String?
+  document                String?
+  payment_ref_no          String?
+  account_id              Int?
+  created_at              DateTime?     @db.Timestamp(0)
+  updated_at              DateTime?     @db.Timestamp(0)
+  transactions            transactions? @relation(fields: [transaction_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transaction_payments_transaction_id_foreign")
+
+  @@index([created_by], map: "transaction_payments_created_by_index")
+  @@index([parent_id], map: "transaction_payments_parent_id_index")
+  @@index([payment_type], map: "transaction_payments_payment_type_index")
+  @@index([transaction_id], map: "transaction_payments_transaction_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transaction_sell_lines {
+  id                         Int                                        @id @default(autoincrement()) @db.UnsignedInt
+  transaction_id             Int                                        @db.UnsignedInt
+  product_id                 Int                                        @db.UnsignedInt
+  variation_id               Int                                        @db.UnsignedInt
+  quantity                   Decimal                                    @default(0.0000) @db.Decimal(22, 4)
+  secondary_unit_quantity    Decimal                                    @default(0.0000) @db.Decimal(22, 4)
+  quantity_returned          Decimal                                    @default(0.0000) @db.Decimal(20, 4)
+  unit_price_before_discount Decimal                                    @default(0.0000) @db.Decimal(22, 4)
+  unit_price                 Decimal?                                   @db.Decimal(22, 4)
+  line_discount_type         transaction_sell_lines_line_discount_type?
+  line_discount_amount       Decimal                                    @default(0.0000) @db.Decimal(22, 4)
+  unit_price_inc_tax         Decimal?                                   @db.Decimal(22, 4)
+  item_tax                   Decimal                                    @db.Decimal(22, 4)
+  tax_id                     Int?                                       @db.UnsignedInt
+  discount_id                Int?
+  lot_no_line_id             Int?
+  sell_line_note             String?                                    @db.Text
+  woocommerce_line_items_id  Int?
+  so_line_id                 Int?
+  so_quantity_invoiced       Decimal                                    @default(0.0000) @db.Decimal(22, 4)
+  res_service_staff_id       Int?
+  res_line_order_status      String?
+  parent_sell_line_id        Int?
+  children_type              String                                     @default("")
+  sub_unit_id                Int?
+  created_at                 DateTime?                                  @db.Timestamp(0)
+  updated_at                 DateTime?                                  @db.Timestamp(0)
+  products                   products                                   @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transaction_sell_lines_product_id_foreign")
+  tax_rates                  tax_rates?                                 @relation(fields: [tax_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transaction_sell_lines_tax_id_foreign")
+  transactions               transactions                               @relation(fields: [transaction_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transaction_sell_lines_transaction_id_foreign")
+  variations                 variations                                 @relation(fields: [variation_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transaction_sell_lines_variation_id_foreign")
+
+  @@index([children_type], map: "transaction_sell_lines_children_type_index")
+  @@index([discount_id], map: "transaction_sell_lines_discount_id_index")
+  @@index([line_discount_type], map: "transaction_sell_lines_line_discount_type_index")
+  @@index([lot_no_line_id], map: "transaction_sell_lines_lot_no_line_id_index")
+  @@index([parent_sell_line_id], map: "transaction_sell_lines_parent_sell_line_id_index")
+  @@index([product_id], map: "transaction_sell_lines_product_id_foreign")
+  @@index([sub_unit_id], map: "transaction_sell_lines_sub_unit_id_index")
+  @@index([tax_id], map: "transaction_sell_lines_tax_id_foreign")
+  @@index([transaction_id], map: "transaction_sell_lines_transaction_id_foreign")
+  @@index([variation_id], map: "transaction_sell_lines_variation_id_foreign")
+  @@index([woocommerce_line_items_id], map: "transaction_sell_lines_woocommerce_line_items_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transaction_sell_lines_purchase_lines {
+  id                       BigInt    @id @default(autoincrement())
+  sell_line_id             Int?      @db.UnsignedInt
+  stock_adjustment_line_id Int?      @db.UnsignedInt
+  purchase_line_id         Int       @db.UnsignedInt
+  quantity                 Decimal   @db.Decimal(22, 4)
+  qty_returned             Decimal   @default(0.0000) @db.Decimal(22, 4)
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+
+  @@index([purchase_line_id], map: "purchase_line_id")
+  @@index([sell_line_id], map: "sell_line_id")
+  @@index([stock_adjustment_line_id], map: "stock_adjustment_line_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transactions {
+  id                                    Int                               @id @default(autoincrement()) @db.UnsignedInt
+  business_id                           Int                               @db.UnsignedInt
+  location_id                           Int?                              @db.UnsignedInt
+  is_kitchen_order                      Boolean                           @default(false)
+  res_table_id                          Int?                              @db.UnsignedInt
+  res_waiter_id                         Int?                              @db.UnsignedInt
+  res_order_status                      transactions_res_order_status?
+  type                                  String?
+  sub_type                              String?                           @db.VarChar(20)
+  status                                String
+  sub_status                            String?
+  is_quotation                          Boolean                           @default(false)
+  payment_status                        transactions_payment_status?
+  adjustment_type                       transactions_adjustment_type?
+  contact_id                            Int?                              @db.UnsignedInt
+  customer_group_id                     Int?
+  invoice_no                            String?
+  ref_no                                String?
+  source                                String?
+  subscription_no                       String?
+  subscription_repeat_on                String?
+  transaction_date                      DateTime                          @db.DateTime(0)
+  total_before_tax                      Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  tax_id                                Int?                              @db.UnsignedInt
+  tax_amount                            Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  discount_type                         transactions_discount_type?
+  discount_amount                       Decimal?                          @default(0.0000) @db.Decimal(22, 4)
+  rp_redeemed                           Int                               @default(0)
+  rp_redeemed_amount                    Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  shipping_details                      String?
+  shipping_address                      String?                           @db.Text
+  delivery_date                         DateTime?                         @db.DateTime(0)
+  shipping_status                       String?
+  delivered_to                          String?
+  delivery_person                       BigInt?
+  shipping_charges                      Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  shipping_custom_field_1               String?
+  shipping_custom_field_2               String?
+  shipping_custom_field_3               String?
+  shipping_custom_field_4               String?
+  shipping_custom_field_5               String?
+  additional_notes                      String?                           @db.Text
+  staff_note                            String?                           @db.Text
+  is_export                             Boolean                           @default(false)
+  export_custom_fields_info             String?                           @db.LongText
+  round_off_amount                      Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  additional_expense_key_1              String?
+  additional_expense_value_1            Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  additional_expense_key_2              String?
+  additional_expense_value_2            Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  additional_expense_key_3              String?
+  additional_expense_value_3            Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  additional_expense_key_4              String?
+  additional_expense_value_4            Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  final_total                           Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  expense_category_id                   Int?                              @db.UnsignedInt
+  expense_sub_category_id               Int?
+  expense_for                           Int?                              @db.UnsignedInt
+  commission_agent                      Int?
+  document                              String?
+  is_direct_sale                        Boolean                           @default(false)
+  is_suspend                            Boolean                           @default(false)
+  exchange_rate                         Decimal                           @default(1.000) @db.Decimal(20, 3)
+  total_amount_recovered                Decimal?                          @db.Decimal(22, 4)
+  transfer_parent_id                    Int?
+  return_parent_id                      Int?
+  opening_stock_product_id              Int?
+  created_by                            Int                               @db.UnsignedInt
+  repair_completed_on                   DateTime?                         @db.DateTime(0)
+  repair_warranty_id                    Int?
+  repair_brand_id                       Int?
+  repair_status_id                      Int?
+  repair_model_id                       Int?
+  repair_job_sheet_id                   Int?                              @db.UnsignedInt
+  repair_defects                        String?                           @db.Text
+  repair_serial_no                      String?
+  repair_checklist                      String?                           @db.Text
+  repair_security_pwd                   String?
+  repair_security_pattern               String?
+  repair_due_date                       DateTime?                         @db.DateTime(0)
+  repair_device_id                      Int?
+  repair_updates_notif                  Boolean                           @default(false)
+  crm_is_order_request                  Boolean                           @default(false)
+  essentials_duration                   Decimal                           @db.Decimal(8, 2)
+  essentials_duration_unit              String?                           @db.VarChar(20)
+  essentials_amount_per_unit_duration   Decimal                           @default(0.0000) @db.Decimal(22, 4)
+  essentials_allowances                 String?                           @db.Text
+  essentials_deductions                 String?                           @db.Text
+  woocommerce_order_id                  Int?
+  purchase_requisition_ids              String?                           @db.Text
+  prefer_payment_method                 String?
+  prefer_payment_account                Int?
+  sales_order_ids                       String?                           @db.Text
+  purchase_order_ids                    String?                           @db.Text
+  custom_field_1                        String?
+  custom_field_2                        String?
+  custom_field_3                        String?
+  custom_field_4                        String?
+  import_batch                          Int?
+  import_time                           DateTime?                         @db.DateTime(0)
+  types_of_service_id                   Int?
+  packing_charge                        Decimal?                          @db.Decimal(22, 4)
+  packing_charge_type                   transactions_packing_charge_type?
+  service_custom_field_1                String?                           @db.Text
+  service_custom_field_2                String?                           @db.Text
+  service_custom_field_3                String?                           @db.Text
+  service_custom_field_4                String?                           @db.Text
+  service_custom_field_5                String?                           @db.Text
+  service_custom_field_6                String?                           @db.Text
+  is_created_from_api                   Boolean                           @default(false)
+  rp_earned                             Int                               @default(0)
+  order_addresses                       String?                           @db.Text
+  is_recurring                          Boolean                           @default(false)
+  recur_interval                        Float?
+  recur_interval_type                   transactions_recur_interval_type?
+  recur_repetitions                     Int?
+  recur_stopped_on                      DateTime?                         @db.DateTime(0)
+  recur_parent_id                       Int?
+  invoice_token                         String?
+  pay_term_number                       Int?
+  pay_term_type                         transactions_pay_term_type?
+  selling_price_group_id                Int?
+  hms_booking_arrival_date_time         DateTime?                         @db.DateTime(0)
+  hms_booking_departure_date_time       DateTime?                         @db.DateTime(0)
+  hms_coupon_id                         Int?
+  check_in                              DateTime?                         @db.DateTime(0)
+  check_out                             DateTime?                         @db.DateTime(0)
+  gym_package_start_date                DateTime?                         @db.Date
+  gym_package_end_date                  DateTime?                         @db.Date
+  gym_package_id                        BigInt?                           @db.UnsignedBigInt
+  created_at                            DateTime?                         @db.Timestamp(0)
+  updated_at                            DateTime?                         @db.Timestamp(0)
+  purchase_lines                        purchase_lines[]
+  stock_adjustment_lines                stock_adjustment_lines[]
+  transaction_payments                  transaction_payments[]
+  transaction_sell_lines                transaction_sell_lines[]
+  business                              business                          @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_business_id_foreign")
+  contacts                              contacts?                         @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_contact_id_foreign")
+  users_transactions_created_byTousers  users                             @relation("transactions_created_byTousers", fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_created_by_foreign")
+  expense_categories                    expense_categories?               @relation(fields: [expense_category_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_expense_category_id_foreign")
+  users_transactions_expense_forTousers users?                            @relation("transactions_expense_forTousers", fields: [expense_for], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_expense_for_foreign")
+  business_locations                    business_locations?               @relation(fields: [location_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "transactions_location_id_foreign")
+  repair_job_sheets                     repair_job_sheets?                @relation(fields: [repair_job_sheet_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_repair_job_sheet_id_foreign")
+  tax_rates                             tax_rates?                        @relation(fields: [tax_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "transactions_tax_id_foreign")
+
+  @@index([business_id], map: "transactions_business_id_index")
+  @@index([commission_agent], map: "transactions_commission_agent_index")
+  @@index([contact_id], map: "transactions_contact_id_index")
+  @@index([created_by], map: "transactions_created_by_index")
+  @@index([delivery_date], map: "transactions_delivery_date_index")
+  @@index([delivery_person], map: "transactions_delivery_person_index")
+  @@index([discount_type], map: "transactions_discount_type_index")
+  @@index([expense_category_id], map: "transactions_expense_category_id_index")
+  @@index([expense_for], map: "transactions_expense_for_foreign")
+  @@index([location_id], map: "transactions_location_id_index")
+  @@index([packing_charge_type], map: "transactions_packing_charge_type_index")
+  @@index([payment_status], map: "transactions_payment_status_index")
+  @@index([recur_parent_id], map: "transactions_recur_parent_id_index")
+  @@index([repair_brand_id], map: "transactions_repair_brand_id_index")
+  @@index([repair_device_id], map: "transactions_repair_device_id_index")
+  @@index([repair_job_sheet_id], map: "transactions_repair_job_sheet_id_index")
+  @@index([repair_model_id], map: "transactions_repair_model_id_index")
+  @@index([repair_status_id], map: "transactions_repair_status_id_index")
+  @@index([repair_warranty_id], map: "transactions_repair_warranty_id_index")
+  @@index([res_order_status], map: "transactions_res_order_status_index")
+  @@index([res_table_id], map: "transactions_res_table_id_index")
+  @@index([res_waiter_id], map: "transactions_res_waiter_id_index")
+  @@index([return_parent_id], map: "transactions_return_parent_id_index")
+  @@index([selling_price_group_id], map: "transactions_selling_price_group_id_index")
+  @@index([status], map: "transactions_status_index")
+  @@index([sub_status], map: "transactions_sub_status_index")
+  @@index([sub_type], map: "transactions_sub_type_index")
+  @@index([tax_id], map: "transactions_tax_id_foreign")
+  @@index([transaction_date], map: "transactions_transaction_date_index")
+  @@index([transfer_parent_id], map: "transactions_transfer_parent_id_index")
+  @@index([type], map: "transactions_type_index")
+  @@index([types_of_service_id], map: "transactions_types_of_service_id_index")
+  @@index([woocommerce_order_id], map: "transactions_woocommerce_order_id_index")
+  @@index([type], map: "type")
+}
+
+model types_of_services {
+  id                   Int                                    @id @default(autoincrement()) @db.UnsignedInt
+  name                 String
+  description          String?                                @db.Text
+  business_id          Int
+  location_price_group String?                                @db.Text
+  packing_charge       Decimal?                               @db.Decimal(22, 4)
+  packing_charge_type  types_of_services_packing_charge_type?
+  enable_custom_fields Boolean                                @default(false)
+  created_at           DateTime?                              @db.Timestamp(0)
+  updated_at           DateTime?                              @db.Timestamp(0)
+
+  @@index([business_id], map: "types_of_services_business_id_index")
+}
+
+model units {
+  id                   Int        @id @default(autoincrement()) @db.UnsignedInt
+  business_id          Int        @db.UnsignedInt
+  actual_name          String
+  short_name           String
+  allow_decimal        Boolean
+  base_unit_id         Int?
+  base_unit_multiplier Decimal?   @db.Decimal(20, 4)
+  created_by           Int        @db.UnsignedInt
+  deleted_at           DateTime?  @db.Timestamp(0)
+  created_at           DateTime?  @db.Timestamp(0)
+  updated_at           DateTime?  @db.Timestamp(0)
+  products             products[]
+  business             business   @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "units_business_id_foreign")
+  users                users      @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "units_created_by_foreign")
+
+  @@index([base_unit_id], map: "units_base_unit_id_index")
+  @@index([business_id], map: "units_business_id_foreign")
+  @@index([created_by], map: "units_created_by_foreign")
+}
+
+model user_contact_access {
+  id         Int @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int
+  contact_id Int
+
+  @@index([contact_id], map: "user_contact_access_contact_id_index")
+  @@index([user_id], map: "user_contact_access_user_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                                                       Int                    @id @default(autoincrement()) @db.UnsignedInt
+  user_type                                                String                 @default("user")
+  surname                                                  String?                @db.Char(10)
+  first_name                                               String
+  last_name                                                String?
+  username                                                 String?                @unique(map: "users_username_unique")
+  email                                                    String?
+  password                                                 String?
+  language                                                 String                 @default("en") @db.Char(7)
+  contact_no                                               String?                @db.Char(15)
+  address                                                  String?                @db.Text
+  remember_token                                           String?                @db.VarChar(100)
+  business_id                                              Int?                   @db.UnsignedInt
+  essentials_department_id                                 Int?
+  essentials_designation_id                                Int?
+  essentials_salary                                        Decimal?               @db.Decimal(22, 4)
+  essentials_pay_period                                    String?
+  essentials_pay_cycle                                     String?
+  available_at                                             DateTime?              @db.DateTime(0)
+  paused_at                                                DateTime?              @db.DateTime(0)
+  max_sales_discount_percent                               Decimal?               @db.Decimal(5, 2)
+  allow_login                                              Boolean                @default(true)
+  status                                                   users_status           @default(active)
+  is_enable_service_staff_pin                              Boolean                @default(false)
+  service_staff_pin                                        String?                @db.Text
+  crm_contact_id                                           Int?                   @db.UnsignedInt
+  is_cmmsn_agnt                                            Boolean                @default(false)
+  cmmsn_percent                                            Decimal                @default(0.00) @db.Decimal(4, 2)
+  selected_contacts                                        Boolean                @default(false)
+  dob                                                      DateTime?              @db.Date
+  gender                                                   String?
+  marital_status                                           users_marital_status?
+  blood_group                                              String?                @db.Char(10)
+  contact_number                                           String?                @db.Char(20)
+  alt_number                                               String?
+  family_number                                            String?
+  fb_link                                                  String?
+  twitter_link                                             String?
+  social_media_1                                           String?
+  social_media_2                                           String?
+  permanent_address                                        String?                @db.Text
+  current_address                                          String?                @db.Text
+  guardian_name                                            String?
+  custom_field_1                                           String?
+  custom_field_2                                           String?
+  custom_field_3                                           String?
+  custom_field_4                                           String?
+  bank_details                                             String?                @db.LongText
+  id_proof_name                                            String?
+  id_proof_number                                          String?
+  crm_department                                           String?
+  crm_designation                                          String?
+  location_id                                              Int?
+  deleted_at                                               DateTime?              @db.Timestamp(0)
+  created_at                                               DateTime?              @db.Timestamp(0)
+  updated_at                                               DateTime?              @db.Timestamp(0)
+  bookings                                                 bookings[]
+  brands                                                   brands[]
+  business_business_owner_idTousers                        business[]             @relation("business_owner_idTousers")
+  cash_registers                                           cash_registers[]
+  categories                                               categories[]
+  contacts_contacts_created_byTousers                      contacts[]             @relation("contacts_created_byTousers")
+  products                                                 products[]
+  repair_device_models                                     repair_device_models[]
+  repair_job_sheets_repair_job_sheets_created_byTousers    repair_job_sheets[]    @relation("repair_job_sheets_created_byTousers")
+  repair_job_sheets_repair_job_sheets_service_staffTousers repair_job_sheets[]    @relation("repair_job_sheets_service_staffTousers")
+  tax_rates                                                tax_rates[]
+  transactions_transactions_created_byTousers              transactions[]         @relation("transactions_created_byTousers")
+  transactions_transactions_expense_forTousers             transactions[]         @relation("transactions_expense_forTousers")
+  units                                                    units[]
+  business_users_business_idTobusiness                     business?              @relation("users_business_idTobusiness", fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "users_business_id_foreign")
+  contacts_users_crm_contact_idTocontacts                  contacts?              @relation("users_crm_contact_idTocontacts", fields: [crm_contact_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "users_crm_contact_id_foreign")
+
+  @@index([business_id], map: "users_business_id_foreign")
+  @@index([crm_contact_id], map: "users_crm_contact_id_foreign")
+  @@index([crm_contact_id], map: "users_crm_contact_id_index")
+  @@index([essentials_department_id], map: "users_essentials_department_id_index")
+  @@index([essentials_designation_id], map: "users_essentials_designation_id_index")
+  @@index([user_type], map: "users_user_type_index")
+}
+
+model variation_group_prices {
+  id                   Int                  @id @default(autoincrement()) @db.UnsignedInt
+  variation_id         Int                  @db.UnsignedInt
+  price_group_id       Int                  @db.UnsignedInt
+  price_inc_tax        Decimal              @db.Decimal(22, 4)
+  price_type           String               @default("fixed")
+  created_at           DateTime?            @db.Timestamp(0)
+  updated_at           DateTime?            @db.Timestamp(0)
+  selling_price_groups selling_price_groups @relation(fields: [price_group_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "variation_group_prices_price_group_id_foreign")
+  variations           variations           @relation(fields: [variation_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "variation_group_prices_variation_id_foreign")
+
+  @@index([price_group_id], map: "variation_group_prices_price_group_id_foreign")
+  @@index([variation_id], map: "variation_group_prices_variation_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model variation_location_details {
+  id                   Int                @id @default(autoincrement()) @db.UnsignedInt
+  product_id           Int                @db.UnsignedInt
+  product_variation_id Int                @db.UnsignedInt
+  variation_id         Int                @db.UnsignedInt
+  location_id          Int                @db.UnsignedInt
+  qty_available        Decimal            @default(0.0000) @db.Decimal(22, 4)
+  created_at           DateTime?          @db.Timestamp(0)
+  updated_at           DateTime?          @db.Timestamp(0)
+  business_locations   business_locations @relation(fields: [location_id], references: [id], onUpdate: Restrict, map: "variation_location_details_location_id_foreign")
+  variations           variations         @relation(fields: [variation_id], references: [id], onUpdate: Restrict, map: "variation_location_details_variation_id_foreign")
+
+  @@index([location_id], map: "variation_location_details_location_id_foreign")
+  @@index([product_id], map: "variation_location_details_product_id_index")
+  @@index([product_variation_id], map: "variation_location_details_product_variation_id_index")
+  @@index([variation_id], map: "variation_location_details_variation_id_index")
+}
+
+model variation_templates {
+  id                        Int                         @id @default(autoincrement()) @db.UnsignedInt
+  name                      String
+  business_id               Int                         @db.UnsignedInt
+  woocommerce_attr_id       Int?
+  created_at                DateTime?                   @db.Timestamp(0)
+  updated_at                DateTime?                   @db.Timestamp(0)
+  business                  business                    @relation(fields: [business_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "variation_templates_business_id_foreign")
+  variation_value_templates variation_value_templates[]
+
+  @@index([business_id], map: "variation_templates_business_id_foreign")
+  @@index([woocommerce_attr_id], map: "variation_templates_woocommerce_attr_id_index")
+}
+
+model variation_value_templates {
+  id                    Int                 @id @default(autoincrement()) @db.UnsignedInt
+  name                  String
+  variation_template_id Int                 @db.UnsignedInt
+  created_at            DateTime?           @db.Timestamp(0)
+  updated_at            DateTime?           @db.Timestamp(0)
+  variation_templates   variation_templates @relation(fields: [variation_template_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "variation_value_templates_variation_template_id_foreign")
+
+  @@index([name], map: "variation_value_templates_name_index")
+  @@index([variation_template_id], map: "variation_value_templates_variation_template_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model variations {
+  id                         Int                          @id @default(autoincrement()) @db.UnsignedInt
+  name                       String
+  product_id                 Int                          @db.UnsignedInt
+  sub_sku                    String?
+  product_variation_id       Int                          @db.UnsignedInt
+  woocommerce_variation_id   Int?
+  variation_value_id         Int?
+  default_purchase_price     Decimal?                     @db.Decimal(22, 4)
+  dpp_inc_tax                Decimal                      @default(0.0000) @db.Decimal(22, 4)
+  profit_percent             Decimal                      @default(0.0000) @db.Decimal(22, 4)
+  default_sell_price         Decimal?                     @db.Decimal(22, 4)
+  sell_price_inc_tax         Decimal?                     @db.Decimal(22, 4)
+  created_at                 DateTime?                    @db.Timestamp(0)
+  updated_at                 DateTime?                    @db.Timestamp(0)
+  deleted_at                 DateTime?                    @db.Timestamp(0)
+  combo_variations           String?                      @db.Text
+  purchase_lines             purchase_lines[]
+  stock_adjustment_lines     stock_adjustment_lines[]
+  transaction_sell_lines     transaction_sell_lines[]
+  variation_group_prices     variation_group_prices[]
+  variation_location_details variation_location_details[]
+  products                   products                     @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "variations_product_id_foreign")
+  product_variations         product_variations           @relation(fields: [product_variation_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "variations_product_variation_id_foreign")
+
+  @@index([name], map: "variations_name_index")
+  @@index([product_id], map: "variations_product_id_foreign")
+  @@index([product_variation_id], map: "variations_product_variation_id_foreign")
+  @@index([sub_sku], map: "variations_sub_sku_index")
+  @@index([variation_value_id], map: "variations_variation_value_id_index")
+  @@index([woocommerce_variation_id], map: "variations_woocommerce_variation_id_index")
+}
+
+model warranties {
+  id            Int                      @id @default(autoincrement()) @db.UnsignedInt
+  name          String
+  business_id   Int
+  description   String?                  @db.Text
+  duration      Int
+  duration_type warranties_duration_type
+  created_at    DateTime?                @db.Timestamp(0)
+  updated_at    DateTime?                @db.Timestamp(0)
+
+  @@index([business_id], map: "warranties_business_id_index")
+  @@index([duration_type], map: "warranties_duration_type_index")
+}
+
+model woocommerce_sync_logs {
+  id             Int       @id @default(autoincrement()) @db.UnsignedInt
+  business_id    Int
+  sync_type      String
+  operation_type String?
+  data           String?   @db.LongText
+  details        String?   @db.LongText
+  created_by     Int
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+enum account_transactions_type {
+  debit
+  credit
+}
+
+enum crm_schedule_logs_log_type {
+  call
+  sms
+  meeting
+  email
+}
+
+enum essentials_document_shares_value_type {
+  user
+  role
+}
+
+enum essentials_shifts_type {
+  fixed_shift
+  flexible_shift
+}
+
+enum account_transactions_sub_type {
+  opening_balance
+  fund_transfer
+  deposit
+}
+
+enum crm_campaigns_campaign_type {
+  sms
+  email
+}
+
+enum essentials_allowances_and_deductions_type {
+  allowance
+  deduction
+}
+
+enum essentials_leave_types_leave_count_interval {
+  month
+  year
+}
+
+enum invoice_schemes_scheme_type {
+  blank
+  year
+}
+
+enum printers_connection_type {
+  network
+  windows
+  linux
+}
+
+enum products_type {
+  single
+  variable
+  modifier
+  combo
+}
+
+enum cash_registers_status {
+  close
+  open
+}
+
+enum cash_register_transactions_type {
+  debit
+  credit
+}
+
+enum printers_capability_profile {
+  default
+  simple
+  SP2000
+  TEP_200M @map("TEP-200M")
+  P822D
+}
+
+enum essentials_allowances_and_deductions_amount_type {
+  fixed
+  percent
+}
+
+enum repair_job_sheets_service_type {
+  carry_in
+  pick_up
+  on_site
+}
+
+enum warranties_duration_type {
+  days
+  months
+  years
+}
+
+enum transactions_res_order_status {
+  received
+  cooked
+  served
+}
+
+enum types_of_services_packing_charge_type {
+  fixed
+  percent
+}
+
+enum essentials_leaves_status {
+  pending
+  approved
+  cancelled
+}
+
+enum essentials_reminders_repeat {
+  one_time
+  every_day
+  every_week
+  every_month
+}
+
+enum crm_schedules_schedule_type {
+  call
+  sms
+  meeting
+  email
+}
+
+enum transaction_sell_lines_line_discount_type {
+  fixed
+  percentage
+}
+
+enum packages_interval {
+  days
+  months
+  years
+}
+
+enum products_tax_type {
+  inclusive
+  exclusive
+}
+
+enum transactions_payment_status {
+  paid
+  due
+  partial
+}
+
+enum crm_schedules_notify_type {
+  minute
+  hour
+  day
+}
+
+enum subscriptions_status {
+  approved
+  waiting
+  declined
+}
+
+enum transactions_adjustment_type {
+  normal
+  abnormal
+}
+
+enum business_locations_receipt_printer_type {
+  browser
+  printer
+}
+
+enum products_barcode_type {
+  C39
+  C128
+  EAN13
+  EAN8
+  UPCA
+  UPCE
+}
+
+enum business_accounting_method {
+  fifo
+  lifo
+  avco
+}
+
+enum products_expiry_period_type {
+  days
+  months
+}
+
+enum business_sell_price_tax {
+  includes
+  excludes
+}
+
+enum users_status {
+  active
+  inactive
+  terminated
+}
+
+enum business_expiry_type {
+  add_expiry
+  add_manufacturing
+}
+
+enum business_on_product_expiry {
+  keep_selling
+  stop_selling
+  auto_delete
+}
+
+enum transactions_discount_type {
+  fixed
+  percentage
+}
+
+enum contacts_pay_term_type {
+  days
+  months
+}
+
+enum users_marital_status {
+  married
+  unmarried
+  divorced
+}
+
+enum business_sales_cmsn_agnt {
+  logged_in_user
+  user
+  cmsn_agnt
+}
+
+enum business_currency_symbol_placement {
+  before
+  after
+}
+
+enum business_rp_expiry_type {
+  month
+  year
+}
+
+enum transactions_packing_charge_type {
+  fixed
+  percent
+}
+
+enum transactions_recur_interval_type {
+  days
+  months
+  years
+}
+
+enum transactions_pay_term_type {
+  days
+  months
+}

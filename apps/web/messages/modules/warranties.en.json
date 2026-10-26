@@ -1,0 +1,19 @@
+{
+  "title": "Warranties",
+  "subtitle": "Warranty terms you can attach to products.",
+  "add": "Add warranty",
+  "edit": "Edit warranty",
+  "searchPlaceholder": "Search warranties...",
+  "name": "Name",
+  "description": "Description",
+  "duration": "Duration",
+  "durationType": "Duration unit",
+  "days": "Days",
+  "months": "Months",
+  "years": "Years",
+  "daysCount": "{count, plural, one {# day} other {# days}}",
+  "monthsCount": "{count, plural, one {# month} other {# months}}",
+  "yearsCount": "{count, plural, one {# year} other {# years}}",
+  "durationInvalid": "Enter a whole number of 1 or more",
+  "deleteBody": "This warranty will be deleted. A warranty used by products or sales cannot be deleted."
+}

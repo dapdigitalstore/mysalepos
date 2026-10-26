@@ -1,0 +1,15 @@
+{
+  "title": "Selling price groups",
+  "subtitle": "Alternative price lists, for example Wholesale or VIP. Give roles access to a group under Users and Roles.",
+  "add": "Add selling price group",
+  "edit": "Edit selling price group",
+  "searchPlaceholder": "Search price groups...",
+  "name": "Name",
+  "description": "Description",
+  "status": "Status",
+  "activate": "Activate",
+  "deactivate": "Deactivate",
+  "activateAria": "Activate {name}",
+  "deactivateAria": "Deactivate {name}",
+  "deleteBody": "This selling price group will be deleted and removed from every role that had access to it. Existing sales are not changed."
+}

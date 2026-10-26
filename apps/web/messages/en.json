@@ -1,0 +1,73 @@
+{
+  "app": { "name": "My SALE POS", "tagline": "Run your whole business from one place" },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to your account",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "invalid": "Invalid username or password",
+    "tooMany": "Too many failed attempts. Please try again in a few minutes.",
+    "generic": "Something went wrong. Please try again.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "nav": {
+    "core": "Main",
+    "addons": "Modules",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logout": "Sign out",
+    "language": "Language"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Hello, {name}",
+    "subtitle": "Here is how {business} is doing this month.",
+    "products": "Products",
+    "contacts": "Contacts",
+    "salesMonth": "Sales this month",
+    "purchasesMonth": "Purchases this month",
+    "orders": "{count} orders",
+    "loadError": "We could not load the summary.",
+    "modulesTitle": "Your modules",
+    "modulesHint": "Modules marked as coming soon are being rebuilt phase by phase."
+  },
+  "module": {
+    "comingSoon": "Coming soon",
+    "available": "Available",
+    "plannedTitle": "{name} is being built",
+    "plannedBody": "This module is scheduled for phase {phase}. It will have exactly the same features as before, rebuilt to be faster and easier to use.",
+    "scope": "What it will include",
+    "back": "Back to dashboard",
+    "phase": "Phase {phase}"
+  },
+  "common": {
+    "retry": "Try again",
+    "loading": "Loading...",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "search": "Search",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "noResults": "Nothing to show yet.",
+    "pageOf": "Page {page} of {total} ({count} total)",
+    "previous": "Previous page",
+    "next": "Next page",
+    "confirmDeleteTitle": "Delete this item?",
+    "confirmDeleteBody": "This cannot be undone.",
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "loadError": "We could not load the data.",
+    "somethingWrong": "Something went wrong. Please try again.",
+    "required": "This field is required",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

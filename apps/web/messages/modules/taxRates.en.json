@@ -1,0 +1,20 @@
+{
+  "title": "Tax rates",
+  "subtitle": "Taxes you can apply to products and sales.",
+  "groupsTitle": "Tax groups",
+  "groupsSubtitle": "Combine several taxes into one, for example VAT + service charge.",
+  "addTax": "Add tax rate",
+  "editTax": "Edit tax rate",
+  "addGroup": "Add tax group",
+  "editGroup": "Edit tax group",
+  "name": "Name",
+  "rate": "Rate (%)",
+  "rateHint": "A number from 0 to 100.",
+  "rateInvalid": "Enter a rate between 0 and 100",
+  "forGroupShort": "Group only",
+  "forGroup": "For tax group only (hide from product and sale forms)",
+  "includes": "Includes",
+  "subTaxes": "Taxes in this group",
+  "pickOne": "Select at least one tax",
+  "groupTotal": "Group total: {total}%"
+}
